@@ -38,7 +38,7 @@ const getProduct = asyncHandler(async (req, res) => {
 // @access  private
 const addProduct = asyncHandler(async (req, res) => {
     if (req.user.type === 'Admin' && req.user.status === 'Active') {
-        const { category, images, age, pieces, isFeatured, features, highlights, details, name, price, brand, tags } = req.body
+        const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
         const newProduct = {
             category,
             images,
@@ -46,13 +46,11 @@ const addProduct = asyncHandler(async (req, res) => {
             pieces,
             isFeatured,
             features,
-            highlights,
             details,
             name,
             price,
             brand,
             reviews: [],
-            tags,
         }
 
         // check if product exists
@@ -107,7 +105,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 const editProduct = asyncHandler(async (req, res) => {
     if (req.user.type === 'Admin' && req.user.status === 'Active') {
 
-        const { category, images, age, pieces, isFeatured, features, highlights, details, name, price, brand, tags } = req.body
+        const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
         const id = req.params.id
 
         // Check for product
@@ -121,12 +119,10 @@ const editProduct = asyncHandler(async (req, res) => {
                 pieces,
                 isFeatured,
                 features,
-                highlights,
                 details,
                 name,
                 price,
                 brand,
-                tags,
             }, {
                 new: true
             })

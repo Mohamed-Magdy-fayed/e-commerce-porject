@@ -26,10 +26,6 @@ const productSchema = mongoose.Schema(
             type: String,
             required: [true, 'Please add a features'],
         },
-        highlights: {
-            type: [String],
-            required: [true, 'Please add a highlights'],
-        },
         details: {
             type: String,
             required: [true, 'Please add a details'],
@@ -55,10 +51,6 @@ const productSchema = mongoose.Schema(
                 reviewComment: String,
                 foundHelpful: Boolean,
             }],
-        },
-        tags: {
-            type: [String],
-            required: [true, 'Please add a tag'],
         },
     },
     {
