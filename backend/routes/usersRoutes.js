@@ -21,7 +21,7 @@ const { protect } = require('../middleware/authMiddleware')
 // Define all the routes for /api/users
 router.get('/admin', protect, getAdminData)
 router.get('/', protect, getUsers)
-router.get('/userid:id', getUser)
+router.get('/userid:id', protect, getUser)
 router.post('/login', loginUser)
 router.post('/userid:id', protect, resetPassword)
 router.post('/register', registerUser)

@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { MdCancel, MdDelete, MdEdit } from "react-icons/md"
+import { MdCancel, MdEdit } from "react-icons/md"
 import { deleteOrderAction, editOrderAction, getOrdersAction } from "../../../context/store/StoreActions"
 import StoreContext from "../../../context/store/StoreContext"
 import OrdersForm from "../../shared/forms/OrdersForm"
@@ -39,6 +39,7 @@ const OrdersTool = () => {
       products: formStates.products,
       totalValue: formStates.totalValue,
     }
+    console.log(orderData);
 
     /* Send data to API to register a new user */
     const newOrder = await editOrderAction(orderData)
@@ -62,6 +63,7 @@ const OrdersTool = () => {
       products: store.appData.orders[index].products,
       totalValue: store.appData.orders[index].totalValue,
     }
+    console.log(initStates);
 
     // fills the content for the edit modal
     const Content = () => {
@@ -79,9 +81,13 @@ const OrdersTool = () => {
   const handleDelete = async (index) => {
     setLoading(true)
     const orderID = store.appData.orders[index]._id
+    const data = {
+      id: orderID,
+      status: 'canceled'
+    }
     /* Send data to API to register a new user */
-    deleteOrderAction(orderID).then(data => {
-      if (!data) {
+    editOrderAction(data).then(res => {
+      if (!res) {
         showToast('an error occurred, please try again', false)
         setLoading(false)
         return
@@ -146,10 +152,10 @@ const OrdersTool = () => {
                           {order.status}
                         </td>
                         <td className="px-6 py-4 flex max-w-fit">
-                          <button id={i} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
+                          <button data-toggle='tooltip' title="edit" id={i} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
                             <MdEdit />
                           </button>
-                          <button id={i} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
+                          <button data-toggle='tooltip' title="cancel" id={i} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
                             <MdCancel />
                           </button>
                         </td>

@@ -1,32 +1,35 @@
+// Generate a token to auth users
 const jwt = require('jsonwebtoken')
+// Create hashed password to be saved in DB
 const bcrypt = require('bcryptjs')
+// Handle the async requests to the API
 const asyncHandler = require('express-async-handler')
+// mongoDB models
 const User = require('../models/usersModel')
 const Product = require('../models/productsModel')
 const Orders = require('../models/ordersModel')
 
-// @desc    Gets all users
-// @route   POST /api/users
+// @desc    Get admin statstics
+// @route   POST /api/users/admin
 // @access  Private
 const getAdminData = asyncHandler(async (req, res) => {
-  if (req.user.type === 'Admin' && req.user.status === 'Active') {
-    const users = await User.find()
-    const products = await Product.find()
-    const orders = await Orders.find()
+  // check user privilege
+  if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-    if (users && products && orders) {
-      const data = {
-        users,
-        products,
-        orders,
-      }
-      res.status(200).json(data)
-    } else {
-      res.status(500).json({ error: 'unknowen server or DB error' })
+  const users = await User.find()
+  const products = await Product.find()
+  const orders = await Orders.find()
+
+  if (users && products && orders) {
+    const data = {
+      users,
+      products,
+      orders,
     }
+    res.status(200).json(data)
   } else {
-    res.status(401)
-    throw new Error(`Unauthorized, no privilges`)
+    res.status(500).json({ error: 'unknowen server or DB error' })
   }
 })
 
@@ -34,33 +37,31 @@ const getAdminData = asyncHandler(async (req, res) => {
 // @route   POST /api/users
 // @access  Private
 const getUsers = asyncHandler(async (req, res) => {
-  if (req.user.type === 'Admin' && req.user.status === 'Active') {
-    const data = await User.find()
+  // check user privilege
+  if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-    if (data) {
-      res.status(200).json(data)
-    } else {
-      res.status(500).json({ error: 'unknowen server or DB error' })
-    }
-  } else {
-    res.status(401)
-    throw new Error(`Unauthorized, no privilges`)
-  }
+  // get the data
+  const data = await User.find()
+  if (!data) return res.status(500).json({ error: 'unknowen server or DB error' })
+
+  res.status(200).json(data)
 })
 
-// @desc    Register new user
-// @route   POST /api/users/:id
+// @desc    Get one user
+// @route   GET /api/users/userid:id
 // @access  Public
 const getUser = asyncHandler(async (req, res) => {
+  // check user privilege
+  if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+
   const id = req.params.id
-
+  // get the data
   const data = await User.findById(id).select('-password')
+  if (!data) return res.status(500).json({ error: 'unknowen server or DB error' })
 
-  if (data) {
-    res.status(200).json(data)
-  } else {
-    res.status(500).json({ error: 'unknowen server or DB error' })
-  }
+  res.status(200).json(data)
 })
 
 // @desc    Register new user
@@ -76,20 +77,11 @@ const registerUser = asyncHandler(async (req, res) => {
     type,
     status } = req.body
 
-  if (!email || !password) {
-    res.status(400)
-    throw new Error('Please add all fields')
-  }
-
   // Check if user exists
   const userExists = await User.findOne({ email })
+  if (userExists) return res.status(400).json({ error: `user already exists` })
 
-  if (userExists) {
-    res.status(400)
-    throw new Error('User already exists')
-  }
-
-  // Hash password
+  // Hash the password
   const salt = await bcrypt.genSalt(10)
   const hashedPassword = await bcrypt.hash(password, salt)
 
@@ -107,16 +99,12 @@ const registerUser = asyncHandler(async (req, res) => {
     wishlistItems: [],
     orders: [],
   })
+  if (!user) return res.status(500).json({ error: `unknowen server or DB error` })
 
-  if (user) {
-    res.status(201).json({
-      user,
-      token: generateToken(user._id),
-    })
-  } else {
-    res.status(400)
-    throw new Error('Invalid user data')
-  }
+  res.status(201).json({
+    user,
+    token: generateToken(user._id),
+  })
 })
 
 // @desc    Authenticate a user
@@ -128,194 +116,150 @@ const loginUser = asyncHandler(async (req, res) => {
   // Check for user email
   const user = await User.findOne({ email })
 
-  if (user && (await bcrypt.compare(password, user.password))) {
-    res.json({
-      user,
-      token: generateToken(user._id),
-    })
-  } else {
-    res.status(400)
-    throw new Error('Invalid credentials')
-  }
+  if (!user || !(await bcrypt.compare(password, user.password))) return res.status(400).json({ error: `invalid credentials` })
+
+  res.json({
+    user,
+    token: generateToken(user._id),
+  })
 })
 
-// @desc    Edit a product
+// @desc    Edit a user
 // @route   PUT /api/users/:id
 // @access  private
 const editUser = asyncHandler(async (req, res) => {
-  if (req.user.status === 'Active') {
-    const {
-      firstName,
-      lastName,
-      email,
-      address,
-      phone,
-      type,
-      status,
-    } = req.body
-    const id = req.params.id
+  // check user privilege
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-    // Check for user
-    const doc = await User.findById(id)
+  const edits = req.user.type === 'Admin' ? {
+    firstName,
+    lastName,
+    email,
+    address,
+    phone,
+    type,
+    status,
+  } : {
+    firstName,
+    lastName,
+    email,
+    address,
+    phone,
+  } = req.body
+  const id = req.params.id
 
-    if (doc) {
-      const data = await User.findOneAndUpdate({ _id: id }, {
-        firstName,
-        lastName,
-        email,
-        address,
-        phone,
-        type,
-        status,
-      }, {
-        new: true
-      })
-      res.status(200).json({
-        updated: data
-      })
-    } else {
-      res.status(400)
-      throw new Error('Invalid user id')
-    }
-  } else {
-    res.status(401)
-    throw new Error(`Unauthorized, no privilges`)
-  }
+  // Check for user
+  const doc = await User.findById(id)
+  if (!doc) return res.status(400).json({ error: `invalid user id` })
+
+  // update the user
+  const data = await User.findOneAndUpdate({ _id: id }, edits, {
+    new: true
+  })
+  if (!data) return res.status(500).json({ error: 'unknowen server or DB error' })
+
+  res.status(200).json({ updated: data })
 })
 
 // @desc    Delete a user
 // @route   DELETE /api/users/:id
 // @access  private
 const deleteUser = asyncHandler(async (req, res) => {
-  if (req.user.type === 'Admin' && req.user.status === 'Active') {
-    const id = req.params.id
+  // check user privilege
+  if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-    // Check for user
-    const doc = await User.findById(id)
+  const id = req.params.id
 
-    if (doc) {
-      await User.deleteOne({ _id: id })
-      res.status(200).json({
-        id: doc.id
-      })
-    } else {
-      res.status(400)
-      throw new Error('Invalid user id')
-    }
-  } else {
-    res.status(401)
-    throw new Error(`Unauthorized, no privilges`)
-  }
+  // Check for user
+  const doc = await User.findById(id)
+  if (!doc) return res.status(400).json({ error: `invalid user id` })
+
+  const deleted = await User.deleteOne({ _id: id })
+  if (!deleted) return res.status(500).json({ error: 'unknowen server or DB error' })
+
+  res.status(200).json({ deletedID: doc.id })
 })
 
 // @desc    Add a product to the user's cart, wishlist or orders
 // @route   PUT /api/users/:id/:location
 // @access  private
 const addItemToUser = asyncHandler(async (req, res) => {
-  if (req.user.status === 'Active') {
+  // check user privilege
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    const { itemID } = req.body
-    const { id, location } = req.params
+  const { itemID } = req.body
+  const { id, location } = req.params
 
-    // Check for user
-    const user = await User.findById(id)
+  // Check for user
+  const user = await User.findById(id)
 
-    if (user) {
-      if (!user[location].includes(itemID)) {
-        user[location].push(itemID)
-        location === 'orders' ? user.cartItems = [] : null
-        const data = await User.findOneAndUpdate({ _id: id }, user, {
-          new: true
-        })
-        res.status(200).json({
-          updated: data
-        })
-      } else {
-        res.status(400)
-        throw new Error('Item already exists')
-      }
-    } else {
-      res.status(400)
-      throw new Error('Invalid user id')
-    }
-  } else {
-    res.status(401)
-    throw new Error(`Unauthorized, no privilges`)
-  }
+  if (!user) return res.status(400).json({ error: `invalid user id` })
+  if (user[location].includes(itemID)) return res.status(400).json({ error: `item already exists` })
+
+  user[location].push(itemID)
+  location === 'orders' ? user.cartItems = [] : null
+  const data = await User.findOneAndUpdate({ _id: id }, user, {
+    new: true
+  })
+  if (!data) return res.status(500).json({ error: 'unknowen server or DB error' })
+
+  res.status(200).json({ updated: data })
 })
 
-// @desc    Add a product to the user's cart, wishlist or orders
+// @desc    delete a product from the user's cart, wishlist or orders
 // @route   DELETE /api/users/:id/:location
 // @access  private
 const deleteItemFromUser = asyncHandler(async (req, res) => {
-  if (req.user.status === 'Active') {
+  // check user privilege
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    const { itemID } = req.body
-    const { id, location } = req.params
+  const { itemID } = req.body
+  const { id, location } = req.params
 
-    // Check for user
-    const user = await User.findById(id)
+  // Check for user
+  const user = await User.findById(id)
 
-    if (user) {
-      if (user[location].includes(itemID)) {
-        const update = user[location].filter(item => item !== itemID)
-        const data = await User.findOneAndUpdate({ _id: id }, {
-          [location]: update,
-        }, {
-          new: true
-        })
-        console.log(data)
-        res.status(200).json({
-          updated: data
-        })
-      } else {
-        res.status(400)
-        throw new Error("Invalid item id")
-      }
-    } else {
-      res.status(400)
-      throw new Error('Invalid user id')
-    }
-  } else {
-    res.status(401)
-    throw new Error(`Unauthorized, no privilges`)
-  }
+  if (!user) return res.status(400).json({ error: `invalid user id` })
+  if (!user[location].includes(itemID)) return res.status(400).json({ error: `invalid item id` })
+
+  const update = user[location].filter(item => item !== itemID)
+  const data = await User.findOneAndUpdate({ _id: id }, {
+    [location]: update,
+  }, {
+    new: true
+  })
+  if (!data) return res.status(500).json({ error: 'unknowen server or DB error' })
+
+  res.status(200).json({ updated: data })
+
 })
 
 // @desc    Resets user password
-// @route   post /api/users/:id
+// @route   post /api/users/userid:id
 // @access  private
 const resetPassword = asyncHandler(async (req, res) => {
-  if (req.user.status === 'Active') {
+  // check user privilege
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    const { oldPassword, newPassword } = req.body
-    const { id } = req.params
-    // Check for user
-    const user = await User.findById(id)
+  const { oldPassword, newPassword } = req.body
+  const { id } = req.params
+  // Check for user
+  const user = await User.findById(id)
+  if (!user || !(await bcrypt.compare(oldPassword, user.password))) return res.status(400).json({ error: 'incorrect old password' })
 
-    if (user && (await bcrypt.compare(oldPassword, user.password))) {
+  // Hash password
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(newPassword, salt)
 
-      // Hash password
-      const salt = await bcrypt.genSalt(10)
-      const hashedPassword = await bcrypt.hash(newPassword, salt)
+  const data = await User.findOneAndUpdate({ _id: id }, {
+    password: hashedPassword,
+  }, {
+    new: true
+  })
+  if (!data) return res.status(500).json({ error: 'unknowen server or DB error' })
 
-      const data = await User.findOneAndUpdate({ _id: id }, {
-        password: hashedPassword,
-      }, {
-        new: true
-      })
-      res.status(200).json({
-        updated: data
-      })
-    } else {
-      res.status(200).json({
-        error: 'incorrect old password'
-      })
-    }
-  } else {
-    res.status(401)
-    throw new Error(`Unauthorized, no privilges`)
-  }
+  res.status(200).json({ updated: data })
 })
 
 // Generate JWT

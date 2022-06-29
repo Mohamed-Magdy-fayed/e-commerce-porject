@@ -1,8 +1,6 @@
 import axios from 'axios'
 
-const token = `Bearer ${JSON.parse(localStorage.getItem('token')) && JSON.parse(localStorage.getItem('token')).token}`
-
-const createPaymentIntent = async options => {
+export const createPaymentIntent = async (options, token) => {
 
     if (!token) {
         return
@@ -12,29 +10,20 @@ const createPaymentIntent = async options => {
         url: `/payments/create-payment-intent`,
         headers: {
             "Content-Type": "application/json",
-            'Authorization': token
+            'Authorization': `Bearer ${token}`
         },
         data: JSON.stringify(options)
         // make sure to add amount and currency
     }
 
     const res = await axios(config)
-    if (res.status === 200) {
-        const data = await res.data
+        .then(res => res)
+        .catch(e => e.response)
 
-        if (!data || data.error) {
-            console.log("API error:", { data });
-            throw new Error("PaymentIntent API Error");
-        } else {
-            console.log(data.client_secret);
-            return data.client_secret;
-        }
-    } else {
-        return null;
-    }
-};
+    return res.data
+}
 
-const getPublicStripeKey = async () => {
+export const getPublicStripeKey = async (token) => {
 
     if (!token) {
         return
@@ -45,7 +34,7 @@ const getPublicStripeKey = async () => {
         url: `/payments/public-key`,
         headers: {
             "Content-Type": "application/json",
-            'Authorization': token
+            'Authorization': `Bearer ${token}`
         },
     }
     const res = await axios(config)
@@ -59,11 +48,4 @@ const getPublicStripeKey = async () => {
     } else {
         return null;
     }
-};
-
-const api = {
-    createPaymentIntent,
-    getPublicStripeKey: getPublicStripeKey,
-};
-
-export default api;
+}

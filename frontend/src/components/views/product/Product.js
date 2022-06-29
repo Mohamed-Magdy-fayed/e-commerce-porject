@@ -125,42 +125,6 @@ const Product = () => {
     <div className="mt-5">
       {/* Bread crumb */}
       <div className="pt-6">
-        <nav>
-          <ol className="max-w-2xl mx-auto px-4 flex items-center space-x-2 sm:px-6 lg:max-w-7xl lg:px-8">
-            {product.tags.map((tag, i) => (
-              <li key={i}>
-                <div className="flex items-center">
-                  <a
-                    href={tag}
-                    className="mr-2 text-sm font-medium text-gray-900"
-                  >
-                    {tag}
-                  </a>
-                  <svg
-                    width={16}
-                    height={20}
-                    viewBox="0 0 16 20"
-                    fill="currentColor"
-                    xmlns="http://www.w3.org/2000/svg"
-                    aria-hidden="true"
-                    className="w-4 h-5 text-gray-300"
-                  >
-                    <path d="M5.697 4.34L8.98 16.532h1.327L7.025 4.341H5.697z" />
-                  </svg>
-                </div>
-              </li>
-            ))}
-            <li className="text-sm">
-              <Link
-                to=''
-                aria-current="page"
-                className="font-medium text-gray-500 hover:text-gray-600"
-              >
-                {product.name}
-              </Link>
-            </li>
-          </ol>
-        </nav>
         {/* Image gallery */}
         <Swiper
           navigation={true}
@@ -181,7 +145,7 @@ const Product = () => {
 
         {/* Product info */}
         <div className="max-w-2xl mx-auto pt-10 px-4 sm:px-6 lg:max-w-7xl lg:pt-16 lg:px-8 lg:grid lg:grid-cols-3 lg:grid-rows-[auto,auto,1fr] lg:gap-x-8 ">
-          <div className="lg:col-span-2 lg:border-r lg:border-yellow-400 lg:pr-8">
+          <div className="lg:col-span-2 lg:border-r lg:border-indigo-600 lg:pr-8">
             <h1 className="text-2xl font-extrabold tracking-tight text-gray-900 sm:text-3xl">
               {product.name}
             </h1>
@@ -190,8 +154,8 @@ const Product = () => {
             <h2 className="sr-only">Product information</h2>
             <div className="w-full flex justify-between items-center">
               {/*product badge*/}
-              <span className="font-medium text-sm bg-yellow-400 py-1 px-2 my-4">
-                {product.isFeatured ? 'Featured' : ''}
+              <span className={`font-medium text-sm bg-indigo-400 py-1 px-2 my-4 ${!product.isFeatured && 'hidden'}`}>
+                Featured
               </span>
               {/*add to wish list*/}
               <button className="flex items-center">
@@ -212,7 +176,7 @@ const Product = () => {
                       key={rating}
                       className={classNames(
                         reviews.average > rating
-                          ? "text-yellow-400"
+                          ? "text-indigo-600"
                           : "text-gray-200",
                         "h-5 w-5 flex-shrink-0"
                       )}
@@ -223,7 +187,7 @@ const Product = () => {
                 <p className="sr-only">{reviews.average} out of 5 stars</p>
                 <a
                   href={reviews.href}
-                  className="ml-3 text-sm font-bold text-yellow-400 hover:text-yellow-500"
+                  className="ml-3 text-sm font-bold text-indigo-600 hover:text-indigo-500"
                 >
                   {reviews.totalCount} reviews
                 </a>
@@ -231,7 +195,7 @@ const Product = () => {
             </div>
             <div className="flex w-full justify-center my-20">
               {/* Age */}
-              <div className="basis-1/2 flex flex-col items-center justify-center border-r-2 border-yellow-400">
+              <div className="basis-1/2 flex flex-col items-center justify-center border-r-2 border-indigo-600">
                 <p className="text-2xl font-bold">{product.age}</p>
                 <h3 className="text-gray-900 font-medium">Age </h3>
               </div>
@@ -244,12 +208,14 @@ const Product = () => {
               </div>
             </div>
             {/*add to cart*/}
-            <button onClick={() => handleAddToCart()} className="block w-full p-3 bg-[rgb(253,128,36)] font-bold text-sm uppercase  border-2 border-[rgb(253,128,36)] rounded hover:bg-white focus:bg-white focus:outline-none transition-all duration-500 ease-in-out">
-              Add To Cart
-            </button>
+            <div className="w-full flex justify-center">
+              <button onClick={() => handleAddToCart()} className="group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Add To Cart
+              </button>
+            </div>
           </div>
 
-          <div className="py-10 lg:pt-6 lg:pb-16 lg:col-start-1 lg:col-span-2 lg:border-r lg:border-yellow-400 lg:pr-8">
+          <div className="py-10 lg:pt-6 lg:pb-16 lg:col-start-1 lg:col-span-2 lg:border-r lg:border-indigo-400 lg:pr-8">
             {/* Description and details */}
             <div>
               <h3 className="sr-only">Features</h3>
@@ -258,21 +224,6 @@ const Product = () => {
                 <p className="text-base text-gray-900">{product.features}</p>
               </div>
             </div>
-
-            <div className="mt-10">
-              <h3 className="text-sm font-medium text-gray-900">Highlights</h3>
-
-              <div className="mt-4">
-                <ul className="pl-4 list-disc text-sm space-y-2">
-                  {product.highlights.map((highlight, i) => (
-                    <li key={i} className="text-gray-400">
-                      <span className="text-gray-600">{highlight}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-
             <div className="mt-10">
               <h2 className="text-sm font-medium text-gray-900">Details</h2>
 

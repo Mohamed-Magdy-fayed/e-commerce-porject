@@ -1,4 +1,4 @@
-import React from "react";
+import {Link} from "react-router-dom";
 import {
   BsFacebook,
   BsTwitter,
@@ -10,28 +10,28 @@ import { AiFillHome, AiOutlineMail, AiFillPrinter } from "react-icons/ai";
 
 export default function Footer() {
   return (
-    <footer className="text-center lg:text-left bg-[rgb(253,128,36)]/[.5] text-black-600">
-      <div className="flex justify-center items-center lg:justify-between p-8 border-b border-black">
-        <div className="mr-12 hidden lg:block">
+    <footer className="mt-4 text-center lg:text-left bg-indigo-600 text-white-600">
+      <div className="flex justify-center items-center lg:justify-between p-8 border-b border-white bg-indigo-700">
+        <div className="mr-12 hidden lg:block text-white">
           <span>Get connected with us on social networks:</span>
         </div>
         <div className="flex justify-center">
-          <a href="#!" className="mr-6 text-gray-600 hover:text-red-600">
+          <a href="https://www.facebook.com/" target="_Blank" className="mr-6 text-white hover:text-blue-600" rel="noreferrer">
             <BsFacebook />
           </a>
-          <a href="#!" className="mr-6 text-gray-600 hover:text-red-600">
+          <a href="https://twitter.com/" target="_Blank" className="mr-6 text-white hover:text-cyan-600" rel="noreferrer">
             <BsTwitter />
           </a>
-          <a href="#!" className="mr-6 text-gray-600 hover:text-red-600">
+          <a href="https://www.google.com/" target="_Blank" className="mr-6 text-white hover:text-black" rel="noreferrer">
             <BsGoogle />
           </a>
-          <a href="#!" className="mr-6 text-gray-600 hover:text-red-600">
+          <a href="https://www.instagram.com/" target="_Blank" className="mr-6 text-white hover:text-red-600" rel="noreferrer">
             <BsInstagram />
           </a>
         </div>
       </div>
       <div className="mx-6 py-10 text-center md:text-left">
-        <div className="grid grid-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <div className="grid grid-1 md:grid-cols-2 lg:grid-cols-4 gap-8 text-white">
           <div className="">
             <h6
               className="
@@ -49,77 +49,13 @@ export default function Footer() {
             </h6>
           </div>
           <div className="">
-            <h6 className="uppercase font-semibold mb-4 flex justify-center md:justify-start">
-              Products
-            </h6>
             <p className="mb-4">
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
+              <Link
+                to="/"
+                className="underline underline-offset-2 hover:text-black"
               >
-                BrickHeadz
-              </a>
-            </p>
-            <p className="mb-4">
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
-              >
-                DUPLO®
-              </a>
-            </p>
-            <p className="mb-4">
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
-              >
-                Star Wars™
-              </a>
-            </p>
-            <p>
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
-              >
-                Technic™
-              </a>
-            </p>
-          </div>
-          <div className="">
-            <h6 className="uppercase font-semibold mb-4 flex justify-center md:justify-start">
-              Useful links
-            </h6>
-            <p className="mb-4">
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
-              >
-                Pricing
-              </a>
-            </p>
-            <p className="mb-4">
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
-              >
-                Settings
-              </a>
-            </p>
-            <p className="mb-4">
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
-              >
-                Orders
-              </a>
-            </p>
-            <p>
-              <a
-                href="#!"
-                className="text-gray-600 underline underline-offset-2 hover:text-red-600"
-              >
-                Help
-              </a>
+                Products
+              </Link>
             </p>
           </div>
           <div className="">
@@ -143,11 +79,11 @@ export default function Footer() {
           </div>
         </div>
       </div>
-      <div className="text-center p-6 bg-[rgb(253,128,36)]">
+      <div className="text-center p-6 border-t border-white bg-indigo-700 text-white">
         <span>© 2022 Copyright </span>
-        <a className="text-black font-semibold" href="#">
+        <Link className="font-semibold" to="/">
           T3 Toys
-        </a>
+        </Link>
       </div>
     </footer>
   );

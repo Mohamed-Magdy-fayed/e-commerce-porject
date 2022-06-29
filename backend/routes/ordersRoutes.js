@@ -4,7 +4,7 @@ const router = express.Router()
 // Get all the actions (testAPI) from the controller
 const {
     getOrders,
-    getOrder,
+    getUserOrders,
     addOrder,
     deleteOrder,
     editOrder,
@@ -15,7 +15,7 @@ const { protect } = require('../middleware/authMiddleware')
 
 // Define all the routes for /api/users
 router.get('/', protect, getOrders)
-router.get('/:id', protect, getOrder)
+router.get('/:id', protect, getUserOrders)
 router.post('/', protect, addOrder)
 router.delete('/:id', protect, deleteOrder)
 router.put('/:id', protect, editOrder)

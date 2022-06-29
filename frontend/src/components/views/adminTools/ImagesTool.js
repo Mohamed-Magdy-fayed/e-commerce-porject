@@ -1,5 +1,4 @@
-import axios from "axios";
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { MdAdd, MdDelete, MdEdit } from "react-icons/md";
 import { addImageAction, deleteImageAction, editImageAction, getImagesAction } from "../../../context/store/StoreActions";
 import StoreContext from "../../../context/store/StoreContext";
@@ -14,13 +13,13 @@ const ImagesTool = () => {
 
   useEffect(() => {
     setLoading(true)
-    getImagesAction().then((data) => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
+    getImagesAction().then((res) => {
+      if (res.error) {
+        showToast(res.error, false)
         setData('carousel', [])
         setLoading(false)
       } else {
-        setData('carousel', data)
+        setData('carousel', res)
         setLoading(false)
       }
     })

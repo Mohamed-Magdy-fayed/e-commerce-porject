@@ -11,3 +11,24 @@
    right: 2rem;
    overflow: hidden;
 }
+
+.custom-scrollbar::-webkit-scrollbar {
+   height: 8px;
+   border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-button {
+   display: none;
+   border-radius: 20px;
+   color: black;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+   background-color: rgb(67 56 202 / 0.9);
+   border-radius: 20px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track-piece {
+   background-color: rgb(67 56 202 / 0.4);
+   border-radius: 20px;
+}

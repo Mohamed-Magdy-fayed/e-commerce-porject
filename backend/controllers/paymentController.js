@@ -3,36 +3,45 @@ const asyncHandler = require('express-async-handler')
 require('dotenv').config()
 
 // @desc    Gets publishableKey
-// @route   GET /api/users
+// @route   GET /public-key
 // @access  Private
 const getPublishableKey = asyncHandler(async (req, res) => {
+    // check user privilege
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
+
     res.status(200).json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
 })
 
-// @desc    Gets all users
-// @route   POST /api/users
+// @desc    Create the payment intention
+// @route   POST /create-payment-intent
 // @access  Private
 const createPaymentIntent = asyncHandler(async (req, res) => {
-    const body = req.body;
+    // check user privilege
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
+
+    const { payment_method_types, amount, currency } = req.body
 
     const options = {
-        ...body,
-    };
+        payment_method_types,
+        amount,
+        currency,
+    }
 
+    // create the intent
     try {
-        const paymentIntent = await stripe.paymentIntents.create(options);
-        res.json(paymentIntent);
+        const paymentIntent = await stripe.paymentIntents.create(options)
+        res.status(200).json(paymentIntent)
     } catch (err) {
-        res.json(err);
+        res.status(500).json(err)
     }
 })
 
-// @desc    Register new user
-// @route   POST /api/users/:id
-// @access  Public
+// @desc    webhook handler
+// @route   POST /webhook
+// @access  private
 const webhook = asyncHandler(async (req, res) => {
-    let data;
-    let eventType;
+    let data
+    let eventType
     // Check if webhook signing is configured.
     if (process.env.STRIPE_WEBHOOK_SECRET) {
         // Retrieve the event by verifying the signature using the raw body and secret.

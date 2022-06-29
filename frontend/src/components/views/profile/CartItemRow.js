@@ -5,12 +5,12 @@ import StoreContext from '../../../context/store/StoreContext'
 
 const CartItemRow = ({ product, setProductsTotal }) => {
 
-    const { store, deleteFromCart } = useContext(StoreContext)
+    const { store, deleteFromLocation } = useContext(StoreContext)
 
     const [amount, setAmount] = useState(1)
 
     const handleRemoveItem = (productID) => {
-        deleteFromCart(productID)
+        deleteFromLocation(productID, 'cartItems')
         deleteItemFromUser(store.auth.user._id, 'cartItems', productID)
         setProductsTotal((prev) => {
             const { [productID]: removedProperty, ...prevRest } = prev
@@ -48,7 +48,7 @@ const CartItemRow = ({ product, setProductsTotal }) => {
                     <div className="relative flex flex-row w-full h-8">
                         <input
                             type="number"
-                            className="w-full p-2 font-semibold text-center text-gray-700 bg-yellow-200 outline-none rounded-lg focus:outline-none hover:text-black focus:text-black"
+                            className="w-full p-2 font-semibold text-center text-gray-700 bg-indigo-200 outline-none rounded-lg focus:outline-none hover:text-black focus:text-black"
                             onChange={(e) => {
                                 setProductsTotal((prev) => {
                                     return { ...prev, [product._id]: e.target.value }

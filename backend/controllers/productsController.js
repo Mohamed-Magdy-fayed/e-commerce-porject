@@ -1,23 +1,20 @@
-// Generate a token to auth users
-const jwt = require('jsonwebtoken')
-// Create hashed password to be saved in DB
-const bcrypt = require('bcryptjs')
 // Handle the async requests to the API
 const asyncHandler = require('express-async-handler')
-
+// mongoDB model
 const Product = require('../models/productsModel')
 
 // @desc    get all products
 // @route   GET /api/products
-// @access  Public
+// @access  private
 const getProducts = asyncHandler(async (req, res) => {
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+
     const data = await Product.find()
-    if (!data) {
-        res.status(500)
-        throw new Error('server error please try again')
-    } else {
-        res.status(200).json(data)
-    }
+    if (!data) return res.status(500).json({ error: `server error please try again` })
+
+    res.status(200).json(data)
 })
 
 // @desc    get one product
@@ -25,123 +22,115 @@ const getProducts = asyncHandler(async (req, res) => {
 // @access  Public
 const getProduct = asyncHandler(async (req, res) => {
     const data = await Product.findById(req.params.id)
-    if (!data) {
-        res.status(500)
-        throw new Error('server error please try again')
-    } else {
-        res.status(200).json(data)
-    }
+    if (!data) return res.status(500).json({ error: `server error please try again` })
+
+    res.status(200).json(data)
+})
+
+// @desc    search products
+// @route   GET /api/products/search/:query
+// @access  Public
+const searchProducts = asyncHandler(async (req, res) => {
+    const query = req.params.query
+
+    // search the products
+    const data = await Product.find({ name: { $regex: query, $options: 'i' } })
+    if (!data) return res.status(500).json({ error: `server error please try again` })
+
+    res.status(200).json(data)
 })
 
 // @desc    Add new product
 // @route   POST /api/products
 // @access  private
 const addProduct = asyncHandler(async (req, res) => {
-    if (req.user.type === 'Admin' && req.user.status === 'Active') {
-        const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
-        const newProduct = {
-            category,
-            images,
-            age,
-            pieces,
-            isFeatured,
-            features,
-            details,
-            name,
-            price,
-            brand,
-            reviews: [],
-        }
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-        // check if product exists
-        const exists = await Product.findOne({ name: newProduct.name })
-        if (exists) {
-            res.status(400)
-            throw new Error('already exists')
-        } else {
-            // create the product
-            const data = await Product.create(newProduct)
-            if (data) {
-                res.status(201).json(data)
-            } else {
-                res.status(500)
-                throw new Error('unknowen server or DB error')
-            }
-        }
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
+    const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
+    const newProduct = {
+        category,
+        images,
+        age,
+        pieces,
+        isFeatured,
+        features,
+        details,
+        name,
+        price,
+        brand,
+        reviews: [],
     }
+
+    // check if product exists
+    const exists = await Product.findOne({ name: newProduct.name })
+    if (exists) return res.status(400).json({ error: `already exists` })
+
+    // create the product
+    const data = await Product.create(newProduct)
+    if (!data) return res.status(500).json({ error: `unknowen server or DB error` })
+
+    res.status(201).json(data)
 })
 
-// @desc    Remove a product
+// @desc    Delete a product
 // @route   DELETE /api/products/:id
 // @access  private
 const deleteProduct = asyncHandler(async (req, res) => {
-    if (req.user.type === 'Admin' && req.user.status === 'Active') {
-        const id = req.params.id
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-        // Check for product
-        const doc = await Product.findById(id)
+    const id = req.params.id
+    // Check for product
+    const doc = await Product.findById(id)
 
-        if (doc) {
-            await Product.deleteOne({ _id: id })
-            res.status(200).json({
-                id: doc._id
-            })
-        } else {
-            res.status(400)
-            throw new Error('Invalid product id')
-        }
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
-    }
+    if (!doc) return res.status(400).json({ error: `invalid product id` })
+    const deleted = await Product.deleteOne({ _id: id })
+    if (!deleted) return res.status(500).json({ error: `unknowen server or DB error` })
+
+    res.status(200).json({ id: doc._id })
 })
 
 // @desc    Edit a product
 // @route   PUT /api/products/:id
 // @access  private
 const editProduct = asyncHandler(async (req, res) => {
-    if (req.user.type === 'Admin' && req.user.status === 'Active') {
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-        const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
-        const id = req.params.id
+    const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
+    const id = req.params.id
 
-        // Check for product
-        const doc = await Product.findById(id)
+    // Check for product
+    const doc = await Product.findById(id)
+    if (!doc) return res.status(400).json({ error: `invalid product id` })
 
-        if (doc) {
-            const data = await Product.findOneAndUpdate({ _id: id }, {
-                category,
-                images,
-                age,
-                pieces,
-                isFeatured,
-                features,
-                details,
-                name,
-                price,
-                brand,
-            }, {
-                new: true
-            })
-            res.status(200).json({
-                updated: data
-            })
-        } else {
-            res.status(400)
-            throw new Error('Invalid product id')
-        }
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
-    }
+    const data = await Product.findOneAndUpdate({ _id: id }, {
+        category,
+        images,
+        age,
+        pieces,
+        isFeatured,
+        features,
+        details,
+        name,
+        price,
+        brand,
+    }, {
+        new: true
+    })
+    if (!data) return res.status(500).json({ error: `unknowen server or DB error` })
+
+    res.status(200).json({ updated: data })
 })
 
 module.exports = {
     getProduct,
     getProducts,
+    searchProducts,
     addProduct,
     deleteProduct,
     editProduct,

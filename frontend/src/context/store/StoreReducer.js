@@ -62,7 +62,7 @@ const storeReducer = (state, action) => {
                 ...state,
                 productForm: action.payload,
             }
-        case 'ADD_TO_CART':
+        case 'ADD_TO_LOCATION':
             logger(state, action)
             return {
                 ...state,
@@ -70,11 +70,11 @@ const storeReducer = (state, action) => {
                     ...state.auth,
                     user: {
                         ...state.auth.user,
-                        cartItems: [...state.auth.user.cartItems, action.payload]
+                        [action.location]: [...state.auth.user[action.location], action.payload]
                     }
                 },
             }
-        case 'DELETE_FROM_CART':
+        case 'DELETE_FROM_LOCATION':
             logger(state, action)
             return {
                 ...state,
@@ -82,7 +82,7 @@ const storeReducer = (state, action) => {
                     ...state.auth,
                     user: {
                         ...state.auth.user,
-                        cartItems: state.auth.user.cartItems.filter(i => i !== action.payload)
+                        [action.location]: state.auth.user[action.location].filter(i => i !== action.payload)
                     }
                 },
             }

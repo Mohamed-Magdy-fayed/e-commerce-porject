@@ -5,17 +5,18 @@ import Cart from "./Cart";
 import WishList from "./WishList";
 
 export default function Profile() {
+  
   return (
     <div className="bg-gray-200 mx-auto py-10 px-5">
       <div className="md:flex no-wrap md:-mx-2 ">
         <div className="w-full max-w-[992px] mx-auto">
-          {/*profile summery */}
-          <ProfileSummery />
-
-          <div className="my-10"></div>
-
-          {/* about section */}
-          <AboutUser />
+          <div className="md:flex gap-4 justify-between">
+            {/*profile summery */}
+            <ProfileSummery />
+            <div className="my-10"></div>
+            {/* about section */}
+            <AboutUser />
+          </div>
 
           <div className="my-10"></div>
 

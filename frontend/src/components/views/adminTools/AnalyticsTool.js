@@ -25,18 +25,17 @@ export const AnalyticsTool = () => {
 
   useEffect(() => {
     setLoading(true)
-    getAdminDataAction().then((data) => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
+    getAdminDataAction().then((res) => {
+      if (res.error) {
+        showToast(res.error, false)
         setData('products', [])
         setData('users', [])
         setData('orders', [])
         setLoading(false)
       } else {
-        console.log(data);
-        setData('products', data.products)
-        setData('users', data.users)
-        setData('orders', data.orders)
+        setData('products', res.products)
+        setData('users', res.users)
+        setData('orders', res.orders)
         setLoading(false)
       }
     })

@@ -51,17 +51,12 @@ const ProductsTool = () => {
       pieces: formStates.pieces,
       features: formStates.features,
     }
-    console.log(productData);
 
     /* Send data to API to add a new product */
     const newProduct = await editProductAction(productData)
     hideModal()
-    getProductsAction().then(() => {
-      setReload(!reload)
-      setLoading(false)
-    })
+    setReload(!reload)
 
-    console.log(newProduct);
     return newProduct
   }
 

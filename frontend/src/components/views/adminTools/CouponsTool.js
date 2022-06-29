@@ -79,6 +79,7 @@ const CouponsTool = () => {
       value: formStates.value,
       isActive: formStates.isActive,
       minValue: formStates.minValue,
+      validTill: formStates.validTill
     }
 
     /* Send data to API to register a new user */
@@ -95,7 +96,6 @@ const CouponsTool = () => {
 
   // opens edit modal
   const modalEdit = (index) => {
-    console.log(store.appData);
     const initStates = {
       id: store.appData.coupons[index]._id,
       name: store.appData.coupons[index].name,

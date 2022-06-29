@@ -1,144 +1,117 @@
-// Generate a token to auth users
-const jwt = require('jsonwebtoken')
-// Create hashed password to be saved in DB
-const bcrypt = require('bcryptjs')
 // Handle the async requests to the API
 const asyncHandler = require('express-async-handler')
-
+// mongoDB model
 const Coupons = require('../models/couponModel')
 
 // @desc    get all coupons
 // @route   GET /api/coupons
 // @access  private
 const getCoupons = asyncHandler(async (req, res) => {
-    if (req.user.type === 'Admin' && req.user.status === 'Active') {
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-        const data = await Coupons.find()
-        if (!data) {
-            res.status(500)
-            throw new Error('server or DB error please try again')
-        } else {
-            res.status(200).json(data)
-        }
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
-    }
+    // get the data
+    const data = await Coupons.find()
+    if (!data) return res.status(500).json({ error: `server or DB error please try again` })
+
+    res.status(200).json(data)
 })
 
 // @desc    get one coupon
 // @route   GET /api/coupons/:name
 // @access  private
 const getCoupon = asyncHandler(async (req, res) => {
-    if (req.user.status === 'Active') {
+    // check user privilege
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `account is inactive, please contact support!` })
 
-        const name = req.params.name
+    const name = req.params.name
 
-        const data = await Coupons.find({ name: name })
-        if (!data) {
-            res.status(400)
-            throw new Error('Invalid coupon name')
-        } else {
-            res.status(200).json(data)
-        }
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
-    }
+    // get the data
+    const data = await Coupons.find({ name: name })
+    if (!data) return res.status(400).json({ error: `Invalid coupon name` })
+
+    res.status(200).json(data)
 })
 
 // @desc    Add new coupon
 // @route   POST /api/coupons
 // @access  private
 const addCoupon = asyncHandler(async (req, res) => {
-    if (req.user.type === 'Admin' && req.user.status === 'Active') {
-        const { name, validTill, applyOnCash, isPercentage, value, isActive, minValue } = req.body
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-        const newCoupon = {
-            name,
-            validTill,
-            applyOnCash,
-            isPercentage,
-            value,
-            isActive,
-            minValue,
-        }
+    const { name, validTill, applyOnCash, isPercentage, value, isActive, minValue } = req.body
 
-        // create the coupon
-        const data = await Coupons.create(newCoupon)
-        if (data) {
-            res.status(201).json(data)
-        } else {
-            res.status(500)
-            throw new Error('unknowen server or DB error')
-        }
-
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
+    const newCoupon = {
+        name,
+        validTill,
+        applyOnCash,
+        isPercentage,
+        value,
+        isActive,
+        minValue,
     }
+
+    // create the coupon
+    const data = await Coupons.create(newCoupon)
+    if (!data) return res.status(500).json({ error: `unknowen server or DB error` })
+
+    res.status(201).json(data)
 })
 
 // @desc    Delete a coupon
 // @route   DELETE /api/coupons/:id
 // @access  private
 const deleteCoupon = asyncHandler(async (req, res) => {
-    if (req.user.type === 'Admin' && req.user.status === 'Active') {
-        const id = req.params.id
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-        // Check for product
-        const doc = await Coupons.findById(id)
+    const id = req.params.id
 
-        if (doc) {
-            await Coupons.deleteOne({ _id: id })
-            res.status(200).json({
-                id: doc._id
-            })
-        } else {
-            res.status(400)
-            throw new Error('Invalid coupon id')
-        }
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
-    }
+    // Check for product
+    const doc = await Coupons.findById(id)
+    if (!doc) return res.status(400).json({ error: `Invalid coupon id` })
+
+    // delete the coupon
+    const deleted = await Coupons.deleteOne({ _id: id })
+    if (!deleted) return res.status(500).json({ error: `unknowen server or DB error` })
+
+    res.status(200).json({ id: doc._id })
 })
 
 // @desc    Edit a coupon
 // @route   PUT /api/coupons/:id
 // @access  private
 const editCoupon = asyncHandler(async (req, res) => {
-    if (req.user.type === 'Admin' && req.user.status === 'Active') {
+    // check user privilege
+    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-        const { name, validTill, applyOnCash, isPercentage, value, isActive, minValue } = req.body
-        const id = req.params.id
+    const { name, validTill, applyOnCash, isPercentage, value, isActive, minValue } = req.body
+    const id = req.params.id
 
-        // Check for coupon
-        const doc = await Coupons.findById(id)
+    // Check for coupon
+    const doc = await Coupons.findById(id)
+    if (!doc) return res.status(400).json({ error: `invalid coupon id` })
 
-        if (doc) {
-            const data = await Coupons.findOneAndUpdate({ _id: id }, {
-                name,
-                validTill,
-                applyOnCash,
-                isPercentage,
-                value,
-                isActive,
-                minValue
-            }, {
-                new: true
-            })
-            res.status(200).json({
-                updated: data
-            })
-        } else {
-            res.status(400)
-            throw new Error('Invalid coupon id')
-        }
-    } else {
-        res.status(401)
-        throw new Error(`Unauthorized, no privilges`)
-    }
+    // edit the coupon
+    const data = await Coupons.findOneAndUpdate({ _id: id }, {
+        name,
+        validTill,
+        applyOnCash,
+        isPercentage,
+        value,
+        isActive,
+        minValue
+    }, {
+        new: true
+    })
+    if (!data) return res.status(500).json({ error: `unknowen server or DB error` })
+
+    res.status(200).json({ updated: data })
 })
 
 module.exports = {

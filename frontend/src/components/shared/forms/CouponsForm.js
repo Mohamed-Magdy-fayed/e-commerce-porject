@@ -7,7 +7,6 @@ const CouponsForm = ({ initStates, onSubmit }) => {
 
     const [name, setName] = useState(initStates ? initStates.name : '')
     const [validTill, setValidTill] = useState(initStates ? initStates.validTill : Date.now())
-    const [applyOnCash, setApplyOnCash] = useState(initStates ? initStates.applyOnCash : false)
     const [isPercentage, setIsPercentage] = useState(initStates ? initStates.isPercentage : false)
     const [value, setValue] = useState(initStates ? initStates.value : '')
     const [isActive, setIsActive] = useState(initStates ? initStates.isActive : false)
@@ -20,7 +19,6 @@ const CouponsForm = ({ initStates, onSubmit }) => {
         const formStates = {
             id: initStates ? initStates.id : 0,
             name,
-            applyOnCash,
             isPercentage,
             value,
             isActive,
@@ -65,7 +63,7 @@ const CouponsForm = ({ initStates, onSubmit }) => {
                             onChange={(e) => {
                                 console.log(validTill)
                                 setValidTill(e.target.value)
-                                console.log(validTill)
+                                console.log(e.target.value)
                             }}
                         />
                     </div>

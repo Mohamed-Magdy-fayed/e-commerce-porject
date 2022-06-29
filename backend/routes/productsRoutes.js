@@ -5,6 +5,7 @@ const router = express.Router()
 const {
   getProduct,
   getProducts,
+  searchProducts,
   addProduct,
   deleteProduct,
   editProduct,
@@ -14,7 +15,8 @@ const {
 const { protect } = require('../middleware/authMiddleware')
 
 // Define all the routes for /api/users
-router.get('/', getProducts)
+router.get('/', protect, getProducts)
+router.get('/search/:query', searchProducts)
 router.get('/:id', getProduct)
 router.post('/', protect, addProduct)
 router.delete('/:id', protect, deleteProduct)

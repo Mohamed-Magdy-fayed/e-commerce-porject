@@ -131,35 +131,21 @@ export const StoreProvider = ({ children }) => {
     })
   }
 
-  const addToCart = (productID) => {
+  const addToLocation = (productID, location) => {
     dispatch({
-      type: 'ADD_TO_CART',
-      payload: productID
+      type: 'ADD_TO_LOCATION',
+      payload: productID,
+      location,
     })
   }
-
-  const deleteFromCart = (productID) => {
+  
+  const deleteFromLocation = (productID, location) => {
     dispatch({
-      type: 'DELETE_FROM_CART',
-      payload: productID
+      type: 'DELETE_FROM_LOCATION',
+      payload: productID,
+      location,
     })
   }
-
-  // const setAppData = async (collection) => {
-  //   const config = {
-  //     method: "get",
-  //     url: `https://mina-jpp1.herokuapp.com/api/${collection}`,
-  //   };
-  //   const res = await (await axios(config)).data;
-
-  //   dispatch({
-  //     type: "SET_DATA",
-  //     payload: res,
-  //     collection,
-  //   });
-
-  //   return res
-  // };
 
   return (
     <StoreContext.Provider
@@ -171,9 +157,8 @@ export const StoreProvider = ({ children }) => {
         hideToast,
         showModal,
         hideModal,
-        addToCart,
-        deleteFromCart,
-        // setAppData,
+        addToLocation,
+        deleteFromLocation,
         setData,
         setLoading,
         setProductForm,

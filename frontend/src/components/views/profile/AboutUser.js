@@ -26,8 +26,8 @@ const AboutUser = () => {
     /* Send data to API to register a new user */
     const newUser = await editUserAction(userData)
     hideModal()
-    getUserAction().then((res) => {
-      loginUser(res)
+    getUserAction(userData.id).then((res) => {
+      loginUser({ user: res, token: store.auth.token })
       setLoading(false)
     })
 
@@ -173,10 +173,10 @@ const AboutUser = () => {
   }
 
   return (
-    <div className="bg-white px-3 py-10 shadow rounded border-t-4 border-yellow-400">
+    <div className="bg-white px-3 py-10 shadow rounded border-t-4 border-indigo-400">
       <div className="flex items-center justify-between  text-gray-900 mb-4 text-2xl">
         <div className="flex">
-          <span className="text-green-800">
+          <span className="text-indigo-800">
             <AiOutlineUser className="mr-1" size={30} />
           </span>
           <span className="tracking-wide">About</span>
@@ -195,7 +195,7 @@ const AboutUser = () => {
         </button>
       </div>
       <div className="text-gray-700">
-        <div className="grid md:grid-cols-2 text-sm">
+        <div className="flex flex-col text-sm">
           <div className="grid grid-cols-2">
             <div className="px-4 py-2 font-semibold">First Name</div>
             <div className="px-4 py-2">{store.auth.user.firstName}</div>
@@ -212,7 +212,7 @@ const AboutUser = () => {
           <div className="grid grid-cols-2">
             <div className="px-4 py-2 font-semibold">Email.</div>
             <div className="px-4 py-2 ">
-              <span className="hover:text-yellow-700">{store.auth.user.email}</span>
+              <span className="hover:text-indigo-700 truncate block">{store.auth.user.email}</span>
             </div>
           </div>
           <div className="grid grid-cols-2">

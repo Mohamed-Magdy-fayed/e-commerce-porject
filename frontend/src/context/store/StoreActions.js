@@ -12,19 +12,43 @@ export const getAdminDataAction = async () => {
             'Authorization': token
         }
     };
-    const res = await axios(config)
-    return res.status === 200 ? res.data : null
+    const res = await axios(config).then(res => res).catch(e => e.response)
+    console.log(res)
+    return res.data
 }
 
 // Get products from the DB
-export const getProductsAction = async () => {
+export const searchProductsAction = async (query) => {
     /* Send data to API to add the product */
     const config = {
         method: "get",
-        url: `/api/products`,
+        url: `/api/products/search/${query}`,
+    }
+    const res = await axios(config).then(res => res).catch(e => e)
+    console.log(res)
+    return res.data
+}
+
+// Get products from the DB
+export const getProductsAction = async (limit) => {
+    /* Send data to API to add the product */
+    const config = {
+        method: "get",
+        url: `/api/products/${limit}`,
+    };
+    const res = await axios(config).then(res => res).catch(e => e.response)
+    return res.data
+}
+
+// Get products from the DB
+export const getProductAction = async (id) => {
+    /* Send data to API to add the product */
+    const config = {
+        method: "get",
+        url: `/api/products/${id}`,
     };
     const res = await axios(config)
-    return res.status === 200 ? res.data : null
+    return res.status === 200 ? res.data : res.data.message
 }
 
 // Add a product to the DB
@@ -81,7 +105,10 @@ export const getImagesAction = async () => {
         url: `/api/carousel`,
     };
     const res = await axios(config)
-    return res.status === 200 ? res.data : null
+        .then(res => res)
+        .catch(e => e.response)
+    console.log(res)
+    return res.data
 }
 
 // Add an image to the DB
@@ -130,6 +157,20 @@ export const deleteImageAction = async (imageID) => {
     return res.status === 200 ? res.data : null
 }
 
+// Get order from the DB
+export const getOrderAction = async (id) => {
+    /* Send data to API to get the orders */
+    const config = {
+        method: "get",
+        url: `/api/orders/${id}`,
+        headers: {
+            'Authorization': token
+        }
+    };
+    const res = await axios(config)
+    return res.status === 200 ? res.data : res.data.message
+}
+
 // Get orders from the DB
 export const getOrdersAction = async () => {
     /* Send data to API to get the orders */
@@ -162,6 +203,7 @@ export const addOrderAction = async (orderData) => {
 
 // edit a order on the DB
 export const editOrderAction = async (orderData) => {
+    console.log(orderData)
     /* Send data to API to edit the order */
     const config = {
         method: 'put',
@@ -275,8 +317,8 @@ export const getUsersAction = async () => {
             'Authorization': token
         }
     };
-    const res = await axios(config)
-    return res.status === 200 ? res.data : null
+    const res = await axios(config).then(res => res).catch(e => e.response.data)
+    return res.status === 200 ? res.data : res
 }
 
 // Get a user from the DB

@@ -1,12 +1,12 @@
 import { useContext, useEffect, useState } from "react";
 import { CardElement, useStripe, useElements } from "@stripe/react-stripe-js";
-import api from "../../../paymentsAPI";
+import { createPaymentIntent } from "../../../paymentsAPI";
 import StoreContext from "../../../context/store/StoreContext";
 import { addItemToUser, addOrderAction, editOrderAction } from "../../../context/store/StoreActions";
 
 export default function CheckoutForm({ total, curr, coupon, products, orderTotal }) {
 
-  const { showToast, store, hideModal, deleteFromCart } = useContext(StoreContext)
+  const { showToast, store, deleteFromLocation } = useContext(StoreContext)
 
   const [orderID, setOrderID] = useState(0);
   const [amount, setAmount] = useState(0);
@@ -21,23 +21,22 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
   useEffect(() => {
     // Step 1: Fetch product details such as amount and currency from
     // API to make sure it can't be tampered with in the client.
-    setAmount(total);
-    setCurrency(curr);
+    setAmount(total)
+    setCurrency(curr)
 
     // Step 2: Create PaymentIntent over Stripe API
-    api
-      .createPaymentIntent({
-        payment_method_types: ["card"],
-        amount: parseInt(total),
-        currency: curr,
+    const options = {
+      payment_method_types: ["card"],
+      amount: total.toFixed(0) * 100,
+      currency: curr,
+    }
+    createPaymentIntent(options, store.auth.token)
+      .then(res => {
+        if (res.error) return showToast(res.error, false)
+
+        setClientSecret(res.clientSecret)
       })
-      .then(clientSecret => {
-        setClientSecret(clientSecret);
-      })
-      .catch(err => {
-        showToast(err.message, false);
-      });
-  }, []);
+  }, [])
 
   const handleSubmit = async ev => {
     ev.preventDefault();
@@ -53,16 +52,40 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
       totalValue: orderTotal
     }
 
-    let ID
-    addOrderAction(data).then((res) => {
+    addOrderAction(data).then(async (res) => {
       if (res) {
         setOrderID(res._id)
-        ID = res._id
         addItemToUser(data.userID, 'orders', res._id)
         products.map(product => {
-          deleteFromCart(product.productID)
+          deleteFromLocation(product.productID, 'cartItems')
         })
-        showToast(`thanks for your purchase your order status is currently ${res.status}`, true)
+
+        // Step 3: Use clientSecret from PaymentIntent and the CardElement
+        // to confirm payment with stripe.confirmCardPayment()
+        const payload = await stripe.confirmCardPayment(clientSecret, {
+          payment_method: {
+            card: elements.getElement(CardElement),
+            billing_details: {
+              name: ev.target.name.value
+            }
+          }
+        });
+
+        if (payload.error) {
+          showToast(`Payment failed: ${payload.error.message}`, false);
+          setProcessing(false);
+        } else {
+          setSucceeded(true)
+          setMetadata(payload.paymentIntent)
+          const orderData = {
+            id: res._id,
+            transactionID: payload.paymentIntent.id,
+            status: 'processing',
+          }
+          editOrderAction(orderData)
+          showToast(`your transaction id: ${payload.paymentIntent.id}`, true)
+          setProcessing(false);
+        }
       } else {
         setSucceeded(false)
         showToast(`an error occured please try again later`)
@@ -70,39 +93,13 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
       }
     })
 
-    // Step 3: Use clientSecret from PaymentIntent and the CardElement
-    // to confirm payment with stripe.confirmCardPayment()
-    const payload = await stripe.confirmCardPayment(clientSecret, {
-      payment_method: {
-        card: elements.getElement(CardElement),
-        billing_details: {
-          name: ev.target.name.value
-        }
-      }
-    });
 
-    if (payload.error) {
-      showToast(`Payment failed: ${payload.error.message}`, false);
-      setProcessing(false);
-    } else {
-      setSucceeded(true)
-      setMetadata(payload.paymentIntent)
-      const orderData = {
-        id: ID.toString(),
-        transactionID: payload.paymentIntent.id,
-        status: 'processing',
-      }
-      editOrderAction(orderData)
-      showToast(`your transaction id: ${payload.paymentIntent.id}`, true)
-      hideModal()
-      setProcessing(false);
-    }
   };
 
   const renderSuccess = () => {
     return (
       <div className="text-center p-5 text-green-600 bg-slate-100 rounded-md mt-4">
-        <h1>Your test payment of {metadata.amount} {metadata.currency.toLocaleUpperCase()} has succeeded</h1>
+        <h1>Your test payment of {metadata.amount / 100} {metadata.currency.toLocaleUpperCase()} has succeeded</h1>
         <h1>Your order is submitted with the ID {orderID}</h1>
       </div>
     );
@@ -131,7 +128,7 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
       <form className="p-3 flex flex-col gap-3" onSubmit={handleSubmit}>
         <h1 className="text-yellow-700 text-3xl font-medium">
           {currency && currency.toLocaleUpperCase()}{" "}
-          {amount && amount.toLocaleString(navigator.language, {
+          {amount && amount.toFixed(2).toLocaleString(navigator.language, {
             minimumFractionDigits: 2
           })}{" "}
         </h1>

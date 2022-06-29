@@ -15,8 +15,8 @@ const UsersTool = () => {
     useEffect(() => {
         setLoading(true)
         getUsersAction().then((data) => {
-            if (!data) {
-                showToast('an error occurred, please try again', false)
+            if (data.message) {
+                showToast(data.message, false)
                 setData('users', [])
                 setSearchResults([])
                 setLoading(false)
@@ -133,15 +133,15 @@ const UsersTool = () => {
         /* Send data to API to register a new user */
         deleteUserAction(userID).then(data => {
             if (!data) {
-              showToast('an error occurred, please try again', false)
-              setLoading(false)
-              return
+                showToast('an error occurred, please try again', false)
+                setLoading(false)
+                return
             } else {
-              setReload(!reload)
-              console.log(data)
-              setLoading(false)
+                setReload(!reload)
+                console.log(data)
+                setLoading(false)
             }
-          })
+        })
     }
 
     return (
