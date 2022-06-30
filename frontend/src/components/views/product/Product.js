@@ -113,7 +113,7 @@ const Product = () => {
     }
 
     addToCart(product._id)
-    addItemToUser(store.auth.user._id, 'cartItems', product._id)
+    addItemToUser(store.auth.token, store.auth.user._id, 'cartItems', product._id)
     showToast(`${product.name} has been added to your cart`, true)
   }
 

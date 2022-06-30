@@ -1,11 +1,11 @@
-import axios from "axios";
 import { useContext, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
+import { getUserAction } from "../context/store/StoreActions";
 import StoreContext from "../context/store/StoreContext";
 
 export const useProtect = () => {
     const navigate = useNavigate();
-    const { loginUser, logoutUser, setLoading } = useContext(StoreContext);
+    const { loginUser, logoutUser, setLoading, showToast, store } = useContext(StoreContext);
     const url = useLocation().pathname;
 
     const checkAuth = () => {
@@ -13,18 +13,14 @@ export const useProtect = () => {
         const checkToken = localStorage.getItem('token')
         if (checkToken) {
             const { id, token } = JSON.parse(checkToken)
-            let config = {
-                method: 'get',
-                url: `/api/users/userid${id}`,
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                }
-            };
-            axios(config).then(res => {
+            getUserAction(token, id).then(res => {
+                if (res.error) return showToast(res.error, false)
+                
                 const userData = {
-                    user: res.data,
+                    user: res,
                     token,
                 }
+                console.log(userData);
                 loginUser(userData)
                 setLoading(false)
                 if (url === '/login' || url === '/register') {

@@ -23,7 +23,9 @@ export const createPaymentIntent = async (options, token) => {
     return res.data
 }
 
-export const getPublicStripeKey = async (token) => {
+export const getPublicStripeKey = async () => {
+
+    const token = JSON.parse(localStorage.getItem('token'))?.token
 
     if (!token) {
         return

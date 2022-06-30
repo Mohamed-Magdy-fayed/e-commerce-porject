@@ -25,7 +25,7 @@ export const AnalyticsTool = () => {
 
   useEffect(() => {
     setLoading(true)
-    getAdminDataAction().then((res) => {
+    getAdminDataAction(store.auth.token).then((res) => {
       if (res.error) {
         showToast(res.error, false)
         setData('products', [])

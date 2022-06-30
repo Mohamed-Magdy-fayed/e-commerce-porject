@@ -20,7 +20,7 @@ const RegisterForm = ({ onSubmit, withPW, initStates, admin }) => {
     const [phone, setPhone] = useState(initStates ? initStates.phone : '')
     const [address, setAddress] = useState(initStates ? initStates.address : '')
     const [type, setType] = useState(initStates ? initStates.type : 'User')
-    const [status, setStatus] = useState(initStates ? initStates.status : 'Inactive')
+    const [status, setStatus] = useState(initStates ? initStates.status : 'Active')
 
     // runs the onSubmit func provided as a prope
     const handleSubmit = (e) => {
@@ -38,7 +38,6 @@ const RegisterForm = ({ onSubmit, withPW, initStates, admin }) => {
             type,
             status,
         }
-        console.log(formStates);
         onSubmit(formStates)
         setLoading(false)
     }

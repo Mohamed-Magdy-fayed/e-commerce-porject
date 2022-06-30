@@ -14,7 +14,7 @@ const UsersTool = () => {
 
     useEffect(() => {
         setLoading(true)
-        getUsersAction().then((data) => {
+        getUsersAction(store.auth.token).then((data) => {
             if (data.message) {
                 showToast(data.message, false)
                 setData('users', [])
@@ -48,9 +48,9 @@ const UsersTool = () => {
         }
 
         /* Send data to API to register a new user */
-        const newUser = await addUserAction(userData)
+        const newUser = await addUserAction(store.auth.token, userData)
         hideModal()
-        getUsersAction().then(() => {
+        getUsersAction(store.auth.token).then(() => {
             setReload(!reload)
             setLoading(false)
         })
@@ -91,12 +91,21 @@ const UsersTool = () => {
         console.log(userData)
 
         /* Send data to API to register a new user */
-        const newUser = await editUserAction(userData)
-        hideModal()
-        getUsersAction().then(() => {
-            setReload(!reload)
-            setLoading(false)
-        })
+        const newUser = await editUserAction(store.auth.token, userData)
+            .then(res => {
+                console.log(res)
+                if (res.error) {
+                    showToast(res.error, false)
+                    setLoading(false)
+                    return
+                }
+
+                hideModal()
+                getUsersAction(store.auth.token).then(() => {
+                    setReload(!reload)
+                    setLoading(false)
+                })
+            })
 
         console.log(newUser);
         return newUser
@@ -131,7 +140,7 @@ const UsersTool = () => {
         setLoading(true)
         const userID = store.appData.users[index]._id
         /* Send data to API to register a new user */
-        deleteUserAction(userID).then(data => {
+        deleteUserAction(store.auth.token, userID).then(data => {
             if (!data) {
                 showToast('an error occurred, please try again', false)
                 setLoading(false)

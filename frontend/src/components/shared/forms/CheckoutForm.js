@@ -34,7 +34,10 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
       .then(res => {
         if (res.error) return showToast(res.error, false)
 
-        setClientSecret(res.clientSecret)
+        setClientSecret(res.client_secret)
+      })
+      .catch(e => {
+        console.log(e);
       })
   }, [])
 
@@ -52,10 +55,10 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
       totalValue: orderTotal
     }
 
-    addOrderAction(data).then(async (res) => {
+    addOrderAction(store.auth.token, data).then(async (res) => {
       if (res) {
         setOrderID(res._id)
-        addItemToUser(data.userID, 'orders', res._id)
+        addItemToUser(store.auth.token, data.userID, 'orders', res._id)
         products.map(product => {
           deleteFromLocation(product.productID, 'cartItems')
         })
@@ -82,7 +85,7 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
             transactionID: payload.paymentIntent.id,
             status: 'processing',
           }
-          editOrderAction(orderData)
+          editOrderAction(store.auth.token, orderData)
           showToast(`your transaction id: ${payload.paymentIntent.id}`, true)
           setProcessing(false);
         }
@@ -157,6 +160,7 @@ export default function CheckoutForm({ total, curr, coupon, products, orderTotal
           className="flex justify-center items-center w-full px-10 py-3  font-medium text-white bg-[rgb(253,128,36)] border-2 border-[rgb(253,128,36)] rounded-full outline-none transition-all duration-[350ms] ease-in-out hover:bg-white hover:text-black  
           focus:bg-white focus:text-black uppercase  shadow item-center  focus:outline-none"
           disabled={processing || !clientSecret || !stripe}
+          
         >
           {processing ? "Processing…" : "Pay"}
         </button>

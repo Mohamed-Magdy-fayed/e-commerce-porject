@@ -1,4 +1,3 @@
-import axios from 'axios'
 import { useContext } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { addUserAction } from '../../../context/store/StoreActions'
@@ -7,7 +6,7 @@ import RegisterForm from '../../shared/forms/RegisterForm'
 
 const RegisterPage = () => {
 
-    const { loginUser, showToast } = useContext(StoreContext)
+    const { loginUser, showToast, store } = useContext(StoreContext)
     const navigate = useNavigate()
 
     // Form On Submit
@@ -30,25 +29,24 @@ const RegisterPage = () => {
         }
 
         /* Send data to API to register a new user */
-        const res = await addUserAction()
-        console.log(res)
+        await addUserAction(userData).then(res => {
+            if (res.error) return showToast(res.error, false)
 
-        const storage = {
-            id: res.data.user.id,
-            authToken: res.data.token
-        }
+            const storage = {
+                id: res.user._id,
+                token: res.token
+            }
 
-        localStorage.setItem('token', JSON.stringify(storage))
-        const data = {
-            user: res.data.user,
-            authToken: res.data.token,
-        }
-        loginUser(data)
+            localStorage.setItem('token', JSON.stringify(storage))
+            const data = {
+                user: res.user,
+                token: res.token,   
+            }
+            loginUser(data)
 
-        /*redirect to Home page */
-        navigate('/')
-
-        console.log(userData)
+            /*redirect to Home page */
+            navigate('/')
+        })
     }
 
     return (

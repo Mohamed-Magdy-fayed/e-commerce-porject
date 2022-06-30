@@ -14,10 +14,10 @@ const {
 // Protect the needed routes
 const { protect } = require('../middleware/authMiddleware')
 
-// Define all the routes for /api/users
+// Define all the routes for /api/products
 router.get('/', protect, getProducts)
 router.get('/search/:query', searchProducts)
-router.get('/:id', getProduct)
+router.get('/one/:id', getProduct)
 router.post('/', protect, addProduct)
 router.delete('/:id', protect, deleteProduct)
 router.put('/:id', protect, editProduct)

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from "react"
 import { MdCancel, MdEdit } from "react-icons/md"
-import { deleteOrderAction, editOrderAction, getOrdersAction } from "../../../context/store/StoreActions"
+import { editOrderAction, getOrdersAction } from "../../../context/store/StoreActions"
 import StoreContext from "../../../context/store/StoreContext"
 import OrdersForm from "../../shared/forms/OrdersForm"
 import Spinner from "../../shared/Spinner"
@@ -14,7 +14,7 @@ const OrdersTool = () => {
 
   useEffect(() => {
     setLoading(true)
-    getOrdersAction().then((data) => {
+    getOrdersAction(store.auth.token).then((data) => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setData('orders', [])
@@ -23,6 +23,7 @@ const OrdersTool = () => {
       } else {
         setData('orders', data)
         setSearchResults(data)
+        console.log(data);
         setLoading(false)
       }
     })
@@ -42,9 +43,9 @@ const OrdersTool = () => {
     console.log(orderData);
 
     /* Send data to API to register a new user */
-    const newOrder = await editOrderAction(orderData)
+    const newOrder = await editOrderAction(store.auth.token, orderData)
     hideModal()
-    getOrdersAction().then(() => {
+    getOrdersAction(store.auth.token).then(() => {
       setReload(!reload)
       setLoading(false)
     })
@@ -86,7 +87,7 @@ const OrdersTool = () => {
       status: 'canceled'
     }
     /* Send data to API to register a new user */
-    editOrderAction(data).then(res => {
+    editOrderAction(store.auth.token, data).then(res => {
       if (!res) {
         showToast('an error occurred, please try again', false)
         setLoading(false)

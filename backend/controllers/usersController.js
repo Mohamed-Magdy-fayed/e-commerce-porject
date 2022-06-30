@@ -53,8 +53,7 @@ const getUsers = asyncHandler(async (req, res) => {
 // @access  Public
 const getUser = asyncHandler(async (req, res) => {
   // check user privilege
-  if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
   const id = req.params.id
   // get the data
@@ -129,7 +128,18 @@ const loginUser = asyncHandler(async (req, res) => {
 // @access  private
 const editUser = asyncHandler(async (req, res) => {
   // check user privilege
-  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
+
+  const {
+    firstName,
+    lastName,
+    email,
+    address,
+    phone,
+    type,
+    status,
+  } = req.body
+  const id = req.params.id
 
   const edits = req.user.type === 'Admin' ? {
     firstName,
@@ -145,8 +155,13 @@ const editUser = asyncHandler(async (req, res) => {
     email,
     address,
     phone,
-  } = req.body
-  const id = req.params.id
+  }
+
+  if (edits.email !== req.user.email) {
+    // check email
+    const isDublicate = await User.find({ email: edits.email })
+    if (isDublicate.length > 0) return res.status(400).json({ error: `user email already exists` })
+  }
 
   // Check for user
   const doc = await User.findById(id)

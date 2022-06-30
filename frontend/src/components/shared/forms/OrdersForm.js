@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { AiFillDelete } from 'react-icons/ai'
-import { getCouponAction, getCouponsAction, getProductAction } from '../../../context/store/StoreActions'
+import { getCouponsAction, getProductAction } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
 import Spinner from '../Spinner'
 
@@ -59,7 +59,7 @@ const OrdersForm = ({ initStates, onSubmit }) => {
     }
 
     const getData = async () => {
-        const coupon = await getCouponsAction()
+        const coupon = await getCouponsAction(store.auth.token)
         setCoupons(coupon)
 
         let products = []

@@ -3,20 +3,15 @@ const express = require('express')
 const router = express.Router()
 // Get all the actions from the controller
 const {
-    getPublishableKey,
-    createPaymentIntent,
-    webhook,
+    retrieveSession,
+    createPayment,
 } = require('../controllers/paymentController')
 
 // Protect the needed routes
 const { protect } = require('../middleware/authMiddleware')
 
 // Define all the routes for /api/users
-router.get("/public-key", protect, getPublishableKey);
-
-router.post("/create-payment-intent", protect, createPaymentIntent);
-
-// Webhook handler for asynchronous events.
-router.post("/webhook", protect, webhook);
+router.get("/retrieve/:id", protect, retrieveSession);
+router.post("/create", protect, createPayment);
 
 module.exports = router

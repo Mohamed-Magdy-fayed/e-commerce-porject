@@ -26,34 +26,35 @@ const LoginPage = () => {
       password,
     };
 
-    const res = await loginUserAction(credentials)
+    await loginUserAction(credentials).then(res => {
+      if (res.error) {
+        setLoading(false)
+        return showToast(res.error, false)
+      }
 
-    // Check if wrong password
-    if (!res) {
-      showToast(`Incorrect Password!`, false);
-      setLoading(false);
-      return;
-    }
+      // Dispatch the action to the state
+      const data = {
+        user: res.user,
+        token: res.token,
+      }
+      loginUser(data)
 
-    // Dispatch the action to the state
-    const data = {
-      user: res.data.user,
-      token: res.data.token,
-    };
-    loginUser(data);
+      // Save token to local storage
+      const storage = {
+        id: res.user._id,
+        token: res.token,
+      };
+      localStorage.setItem("token", JSON.stringify(storage));
+      setLoading(false)
 
-    // Save token to local storage
-    const storage = {
-      id: res.data.user._id,
-      token: res.data.token,
-    };
-    localStorage.setItem("token", JSON.stringify(storage));
-    setLoading(false);
-    if (url.includes('login')) {
-      navigate("/")
-    } else {
-      hideModal()
-    }
+      if (url.includes('login')) {
+        navigate("/")
+      } else {
+        hideModal()
+      }
+    })
+
+
   };
 
   // Form on forgot username

@@ -17,10 +17,13 @@ import { useContext } from "react";
 import StoreContext from "../context/store/StoreContext";
 import NotFound from "./shared/NotFound";
 import ProfilePage from "./views/profile/ProfilePage";
+import Spinner from "./shared/Spinner";
 
 const App = () => {
   const { store } = useContext(StoreContext);
   useProtect();
+
+  if (store.loading) return <Spinner />
 
   return (
     <div className="relative">
@@ -36,7 +39,7 @@ const App = () => {
         <Route path="/cart" element={<Cart />} />
         <Route path="/wishlist" element={<WishList />} />
         <Route path="/product/:id" element={<ProductPage />} />
-        <Route path="/profile/:userId" element={<ProfilePage />} />
+        <Route path="/profile/:userId/*" element={<ProfilePage />} />
         <Route
           path="*"
           element={<NotFound code={404} msg={`Page not found!`} />}

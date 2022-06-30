@@ -8,7 +8,7 @@ import {
 } from "react-icons/bs";
 import { AiFillHome, AiOutlineMail, AiFillPrinter } from "react-icons/ai";
 
-export default function Footer() {
+const Footer = () => {
   return (
     <footer className="mt-4 text-center lg:text-left bg-indigo-600 text-white-600">
       <div className="flex justify-center items-center lg:justify-between p-8 border-b border-white bg-indigo-700">
@@ -88,3 +88,5 @@ export default function Footer() {
     </footer>
   );
 }
+
+export default Footer

@@ -5,7 +5,7 @@ import Footer from "../../shared/Footer";
 import { useContext, useEffect, useState } from "react";
 import StoreContext from "../../../context/store/StoreContext";
 import Spinner from "../../shared/Spinner";
-import { getProductsAction } from "../../../context/store/StoreActions";
+import { searchProductsAction } from "../../../context/store/StoreActions";
 
 const Home = () => {
   const { store, setData, showToast } = useContext(StoreContext);
@@ -15,7 +15,7 @@ const Home = () => {
   const [featuredProducts, setFeaturedProducts] = useState([])
 
   useEffect(() => {
-    getProductsAction().then(res => {
+    searchProductsAction().then(res => {
       if (res.error) return showToast(res.error, false)
       
       setData('products', res)

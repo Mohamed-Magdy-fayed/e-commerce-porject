@@ -5,43 +5,36 @@ import { BsTrashFill } from "react-icons/bs";
 import { BsFillCreditCard2FrontFill } from "react-icons/bs";
 import StoreContext from "../../../context/store/StoreContext";
 import CartItemRow from "./CartItemRow";
-import { getCouponAction, getProductsAction } from "../../../context/store/StoreActions";
+import { getCouponAction, getProductAction, getProductsAction, searchProductsAction } from "../../../context/store/StoreActions";
 import Spinner from "../../shared/Spinner";
 import CheckoutModal from "./CheckoutModal";
 
 const Cart = () => {
 
-  const { store, setData, showToast, showModal, setLoading } = useContext(StoreContext)
+  const { store, setData, showToast, showModal } = useContext(StoreContext)
 
   const [total, setTotal] = useState(0)
   const [coupon, setCoupon] = useState(null)
   const [couponName, setCouponName] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
-  const [productsTotal, setProductsTotal] = useState({})
+  const [productsTotal, setProductsTotal] = useState([])
   const [orderDetails, setOrderDetails] = useState({})
 
   const applyCoupon = async () => {
     setCouponLoading(true)
-    getCouponAction(couponName).then(res => {
-      if (res.length === 0) {
-        showToast(`not a valid coupon, codes are case sensitive`)
-        setCouponLoading(false)
-        return
-      }
-      const coupon = res[0]
-      if (coupon.validTill < Date.now()) {
-        showToast(`Coupon expired`)
-        setCouponLoading(false)
-        return
-      }
-      if (parseFloat(coupon.minValue) > parseFloat(total)) {
-        showToast(`Order value is low`)
-        setCouponLoading(false)
-        return
-      }
-      setCoupon(res[0])
+    await getCouponAction(store.auth.token, couponName).then(data => {
+      if (data.error) return showToast(data.error, false)
+      if (data.length === 0) return showToast(`not a valid coupon, codes are case sensitive`)
+
+      const coupon = data[0]
+      if (coupon.validTill < Date.now()) return showToast(`Coupon expired`)
+
+      if (parseFloat(coupon.minValue) > parseFloat(total)) return showToast(`Order value is low`)
+
+      setCoupon(data[0])
       setCouponLoading(false)
     })
+    setCouponLoading(false)
   }
 
   const handleCheckout = () => {
@@ -55,40 +48,28 @@ const Cart = () => {
   }
 
   useEffect(() => {
-    setLoading(true)
-    getProductsAction().then(res => {
-      setData('products', res)
-      setLoading(false)
-    })
-  }, [])
+    // calc total
+    const sum = productsTotal.map(item => item.product.price * item.amount)
+    setTotal(sum.length > 0 ? sum.reduce((a, b) => a + b).toFixed(2) : 0)
+    if (!coupon) return setOrderDetails({ subTotal: parseFloat(total) })
+
+    const discountValue = coupon ? parseInt(coupon.value) : 0
+    const subTotal = coupon.isPercentage ? total - (discountValue/100 * total) : total - discountValue
+    setOrderDetails({ discountValue, subTotal: parseFloat(subTotal) })
+  }, [productsTotal, coupon])
 
   useEffect(() => {
-    const sum = store.auth.user.cartItems.map(productID => {
-      const id = store.appData.products.find(e => e._id === productID)._id
-      const price = store.appData.products.find(e => e._id === productID).price
-      return productsTotal !== {} ? productsTotal[id] * price : 0
-    })
-
-    setTotal(sum.length > 0 && sum.reduce((a, b) => a + b).toFixed(2))
-  }, [productsTotal, couponName, store.auth.user.cartItems])
-
-  useEffect(() => {
-
-    const id = !coupon ? null : coupon._id
-    const value = !coupon ? null : parseFloat(coupon.value)
-    const discountValue = !coupon ? 0 : coupon.isPercentage ? parseFloat(total) * value / 100 : value
-    const orderTotal = parseFloat(total) - (discountValue)
-    setOrderDetails({
-      id,
-      total,
-      discountValue,
-      orderTotal
-    })
-  }, [coupon, total])
-
-  useEffect(() => {
-    setCoupon(null)
-  }, [productsTotal])
+    const getProducts = async () => {
+      let items = []
+      for (let index = 0; index < store.auth.user.cartItems.length; index++) {
+        const id = store.auth.user.cartItems[index]
+        const product = await getProductAction(id)
+        items.push({ product, productID: product._id, amount: 1 })
+      }
+      setProductsTotal(items)
+    }
+    getProducts()
+  }, [store.auth.user.cartItems])
 
   if (store.loading) {
     return <Spinner />
@@ -132,10 +113,9 @@ const Cart = () => {
                 </tr>
               </thead>
               <tbody>
-                {store.appData.products.length > 0 && store.auth.user.cartItems.length > 0 && store.auth.user.cartItems.map(item => {
-                  const product = store.appData.products.filter(p => p._id === item)[0]
-                  return <CartItemRow key={product._id} product={product} setProductsTotal={setProductsTotal} />
-                })}
+                {productsTotal.map(item => (
+                  <CartItemRow key={item.productID} product={item.product} setProductsTotal={setProductsTotal} />
+                ))}
               </tbody>
             </table>
 
@@ -211,10 +191,10 @@ const Cart = () => {
                   </div>
                   <div className="flex justify-between pt-4 border-b">
                     <div className="lg:px-4 lg:py-2 m-2 text-lg lg:text-xl font-bold text-center text-gray-800">
-                      Total
+                      Sub total
                     </div>
                     <div className="lg:px-4 lg:py-2 m-2 lg:text-lg font-bold text-center text-gray-900">
-                      {orderDetails.orderTotal ? orderDetails.orderTotal.toFixed(2) : (0).toFixed(2)}€
+                      {orderDetails.subTotal ? orderDetails.subTotal.toFixed(2) : (0).toFixed(2)}€
                     </div>
                   </div>
                   <button

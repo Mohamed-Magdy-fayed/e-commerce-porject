@@ -3,25 +3,21 @@ import { logger } from "../middleware/logger"
 const storeReducer = (state, action) => {
     switch (action.type) {
         case 'LOGIN_USER':
-            logger(state, action)
             return {
                 ...state,
                 auth: action.payload,
             }
         case 'LOGOUT_USER':
-            logger(state, action)
             return {
                 ...state,
                 auth: action.payload,
             }
         case 'SHOW_TOAST':
-            logger(state, action)
             return {
                 ...state,
                 toast: action.payload,
             }
         case 'HIDE_TOAST':
-            logger(state, action)
             return {
                 ...state,
                 toast: {
@@ -30,19 +26,16 @@ const storeReducer = (state, action) => {
                 }
             }
         case 'SHOW_MODAL':
-            logger(state, action)
             return {
                 ...state,
                 modal: action.payload,
             }
         case 'HIDE_MODAL':
-            logger(state, action)
             return {
                 ...state,
                 modal: action.payload,
             }
         case 'SET_DATA':
-            logger(state, action)
             return {
                 ...state,
                 appData: {
@@ -57,13 +50,11 @@ const storeReducer = (state, action) => {
                 loading: action.payload,
             }
         case 'SET_PRODUCT_FORM':
-            logger(state, action)
             return {
                 ...state,
                 productForm: action.payload,
             }
         case 'ADD_TO_LOCATION':
-            logger(state, action)
             return {
                 ...state,
                 auth: {
@@ -75,7 +66,6 @@ const storeReducer = (state, action) => {
                 },
             }
         case 'DELETE_FROM_LOCATION':
-            logger(state, action)
             return {
                 ...state,
                 auth: {

@@ -1,38 +1,25 @@
-import React, { useContext, useEffect, useState } from "react";
-// Import Swiper React components
+import { useContext, useEffect, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
-
-// Import Swiper styles
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
-
-// import required modules
 import { Autoplay, Pagination, Navigation } from "swiper";
 import StoreContext from "../../../context/store/StoreContext";
 import Spinner from "../../shared/Spinner";
-import axios from "axios";
+import { getImagesAction } from "../../../context/store/StoreActions";
 
 const Carousel = () => {
 
-  const { setData, store } = useContext(StoreContext)
+  const { setData, store, showToast } = useContext(StoreContext)
 
   const [carouselData, setCarouselData] = useState([])
   const [loading, setLoading] = useState()
 
-  const getData = async () => {
-    const config = {
-      method: "get",
-      url: `/api/carousel`,
-    };
-    const res = await (await axios(config)).data;
-
-    return res
-  };
-
   useEffect(() => {
     setLoading(true)
-    getData().then(res => {
+    getImagesAction().then(res => {
+      if (res.error) return showToast(res.error, false)
+      
       let arr = []
       res.forEach(item => {
         if (item.isActive) {

@@ -1,88 +1,86 @@
-const stripe = require('stripe')('sk_test_51L5EiVFDbvgQGIEPornZXqZP5CssLPPG5cGgpvWtPqCte0mktHetbVf4uHLd90JVNheVDc94tSgJMSfMxnJV2m5K00XRwv4vrJ')
-const asyncHandler = require('express-async-handler')
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
+const asyncHandler = require('express-async-handler')
+const Product = require('../models/productsModel')
+const Coupons = require('../models/couponModel')
 
-// @desc    Gets publishableKey
-// @route   GET /public-key
+// @desc    Create the payment intention
+// @route   POST /create
 // @access  Private
-const getPublishableKey = asyncHandler(async (req, res) => {
+const createPayment = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    res.status(200).json({ publishableKey: process.env.STRIPE_PUBLISHABLE_KEY });
+    const products = req.body.products
+    const couponID = req.body.coupon
+
+    const getCoupon = async (id) => {
+        const coupon = await Coupons.findById(id)
+        return coupon ? coupon : null
+    }
+
+    const coupon = await getCoupon(couponID)
+
+    const getProduct = async (product) => {
+        const storeItem = await Product.findById(product.productID)
+        const discount = coupon && coupon.value
+        const amount = coupon && coupon.isPercentage
+            ? (storeItem.price * 100) - ((storeItem.price * 100) * discount / 100)
+            : (storeItem.price * 100) - discount
+
+        return {
+            price_data: {
+                currency: 'usd',
+                product_data: {
+                    name: storeItem.name
+                },
+                unit_amount: parseInt(amount)
+            },
+            quantity: product.amount
+        }
+    }
+
+    let line_items = []
+
+    for (let index = 0; index < products.length; index++) {
+        const product = products[index]
+        line_items.push(await getProduct(product))
+    }
+
+    try {
+        const session = await stripe.checkout.sessions.create({
+            payment_method_types: ['card'],
+            mode: 'payment',
+            line_items,
+            customer: req.user._id,
+            customer_email: req.user.email,
+            metadata: { "coupon": req.body.coupon, "products": JSON.stringify(products) },
+            success_url: `http://localhost:3000/profile/${req.user._id}/success`,
+            cancel_url: `http://localhost:3000/profile/${req.user._id}/cancel`,
+        })
+
+        res.status(200).json({ session })
+    } catch (e) {
+        res.status(500).json({ error: e.message })
+    }
 })
 
 // @desc    Create the payment intention
-// @route   POST /create-payment-intent
+// @route   POST /retrieve/:id
 // @access  Private
-const createPaymentIntent = asyncHandler(async (req, res) => {
+const retrieveSession = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    const { payment_method_types, amount, currency } = req.body
-
-    const options = {
-        payment_method_types,
-        amount,
-        currency,
-    }
-
-    // create the intent
     try {
-        const paymentIntent = await stripe.paymentIntents.create(options)
-        res.status(200).json(paymentIntent)
-    } catch (err) {
-        res.status(500).json(err)
+        const session = await stripe.checkout.sessions.retrieve(req.params.id)
+        res.status(200).json({ session })
+    } catch (e) {
+        res.status(500).json({ error: e.message })
     }
-})
-
-// @desc    webhook handler
-// @route   POST /webhook
-// @access  private
-const webhook = asyncHandler(async (req, res) => {
-    let data
-    let eventType
-    // Check if webhook signing is configured.
-    if (process.env.STRIPE_WEBHOOK_SECRET) {
-        // Retrieve the event by verifying the signature using the raw body and secret.
-        let event;
-        let signature = req.headers["stripe-signature"];
-
-        try {
-            event = stripe.webhooks.constructEvent(
-                req.rawBody,
-                signature,
-                process.env.STRIPE_WEBHOOK_SECRET
-            );
-        } catch (err) {
-            console.log(`⚠️ Webhook signature verification failed.`);
-            return res.sendStatus(400);
-        }
-        // Extract the object from the event.
-        data = event.data;
-        eventType = event.type;
-    } else {
-        // Webhook signing is recommended, but if the secret is not configured in `config.js`,
-        // retrieve the event data directly from the request body.
-        data = req.body.data;
-        eventType = req.body.type;
-    }
-
-    if (eventType === "payment_intent.succeeded") {
-        // Fulfill any orders, e-mail receipts, etc
-        console.log("💰 Payment received!");
-    }
-
-    if (eventType === "payment_intent.payment_failed") {
-        // Notify the customer that their order was not fulfilled
-        console.log("❌ Payment failed.");
-    }
-
-    res.sendStatus(200);
 })
 
 module.exports = {
-    getPublishableKey,
-    createPaymentIntent,
-    webhook,
+    createPayment,
+    retrieveSession,
 }

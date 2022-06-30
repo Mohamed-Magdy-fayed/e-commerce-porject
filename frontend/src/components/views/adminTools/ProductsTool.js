@@ -20,7 +20,7 @@ const ProductsTool = () => {
 
   useEffect(() => {
     setLoading(true)
-    getProductsAction().then((data) => {
+    getProductsAction(store.auth.token).then((data) => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setData('products', [])
@@ -53,7 +53,7 @@ const ProductsTool = () => {
     }
 
     /* Send data to API to add a new product */
-    const newProduct = await editProductAction(productData)
+    const newProduct = await editProductAction(store.auth.token, productData)
     hideModal()
     setReload(!reload)
 
@@ -77,7 +77,7 @@ const ProductsTool = () => {
       highlights: [],
       tags: [],
     }
-    addProductAction(initStates).then(data => {
+    addProductAction(store.auth.token, initStates).then(data => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setAddButtonLoading(false)
@@ -118,7 +118,7 @@ const ProductsTool = () => {
     setProductForm(productData.id, true)
 
     /* Send data to API to register a new user */
-    editProductAction(productData).then(data => {
+    editProductAction(store.auth.token, productData).then(data => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setLoading(false)
@@ -170,7 +170,7 @@ const ProductsTool = () => {
     setLoading(true)
     const productID = store.appData.products[id]._id
     /* Send data to API to register a new user */
-    deleteProductAction(productID).then(data => {
+    deleteProductAction(store.auth.token, productID).then(data => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setLoading(false)

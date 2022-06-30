@@ -14,7 +14,7 @@ const WishlistItem = ({ id }) => {
 
     const removeFromWishlist = async (id) => {
         deleteFromLocation(id, 'wishlistItems')
-        await deleteItemFromUser(store.auth.user._id, 'wishlistItems', id)
+        await deleteItemFromUser(store.auth.token, store.auth.user._id, 'wishlistItems', id)
         setLoading(false)
         showToast(`${product.name} has been removed from your wishlist`, true)
         return
@@ -26,14 +26,14 @@ const WishlistItem = ({ id }) => {
         const isAdded = store.auth.user[location].filter(p => p === product._id).length > 0 ? true : false
         if (isAdded) {
             deleteFromLocation(product._id, location)
-            await deleteItemFromUser(store.auth.user._id, location, product._id)
+            await deleteItemFromUser(store.auth.token, store.auth.user._id, location, product._id)
             setLoading(false)
             showToast(`${product.name} has been removed from your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)
             return
         }
 
         addToLocation(product._id, location)
-        await addItemToUser(store.auth.user._id, location, product._id)
+        await addItemToUser(store.auth.token, store.auth.user._id, location, product._id)
         setLoading(false)
         showToast(`${product.name} has been added to your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)
     }

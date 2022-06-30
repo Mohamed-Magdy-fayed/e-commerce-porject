@@ -8,8 +8,6 @@ const AboutUser = () => {
 
   const { store, showModal, setLoading, hideModal, loginUser, showToast } = useContext(StoreContext)
 
-  const [togglePassword, setTogglePassword] = useState(false)
-
   const handleEditSubmit = async (formStates) => {
     setLoading(true)
     const userData = {
@@ -21,18 +19,17 @@ const AboutUser = () => {
       phone: formStates.phone,
     }
 
-    console.log(userData)
-
     /* Send data to API to register a new user */
-    const newUser = await editUserAction(userData)
-    hideModal()
-    getUserAction(userData.id).then((res) => {
-      loginUser({ user: res, token: store.auth.token })
-      setLoading(false)
-    })
+    await editUserAction(store.auth.token, userData)
+      .then(res => {
+        if (res.error) return showToast(res.error, false)
 
-    console.log(newUser);
-    return newUser
+        getUserAction(store.auth.token, userData.id).then((res) => {
+          loginUser({ user: res, token: store.auth.token })
+          hideModal()
+          setLoading(false)
+        })
+      })
   }
 
   const handleEditUser = () => {
@@ -44,7 +41,6 @@ const AboutUser = () => {
       phone: store.auth.user.phone,
       address: store.auth.user.address,
     }
-    console.log(initStates)
 
     const Content = () => {
       return (
@@ -63,7 +59,6 @@ const AboutUser = () => {
     const initStates = {
       id: store.auth.user._id,
     }
-    console.log(initStates)
 
     const Content = () => {
       const [oldPassword, setOldPassword] = useState('')
@@ -75,9 +70,9 @@ const AboutUser = () => {
 
         if (newPassword === newPasswordConf) {
           setLoading(true)
-          resetPasswordAction(initStates.id, oldPassword, newPassword).then((data) => {
-            if (data.error) {
-              showToast(`incorrect old password`, false)
+          resetPasswordAction(store.auth.token, initStates.id, oldPassword, newPassword).then((res) => {
+            if (res.error) {
+              showToast(res.error, false)
               setLoading(false)
               return
             }

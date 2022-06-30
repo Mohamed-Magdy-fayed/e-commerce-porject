@@ -24,14 +24,14 @@ const ProductCard = ({ productData }) => {
     const isAdded = store.auth.user[location].filter(p => p === productData._id).length > 0 ? true : false
     if (isAdded) {
       deleteFromLocation(productData._id, location)
-      await deleteItemFromUser(store.auth.user._id, location, productData._id)
+      await deleteItemFromUser(store.auth.token, store.auth.user._id, location, productData._id)
       setLoading(false)
       showToast(`${productData.name} has been removed from your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)
       return
     }
 
     addToLocation(productData._id, location)
-    await addItemToUser(store.auth.user._id, location, productData._id)
+    await addItemToUser(store.auth.token, store.auth.user._id, location, productData._id)
     setLoading(false)
     showToast(`${productData.name} has been added to your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)
   }

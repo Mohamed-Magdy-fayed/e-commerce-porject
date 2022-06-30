@@ -85,7 +85,6 @@ const deleteOrder = asyncHandler(async (req, res) => {
 // @access  private
 const editOrder = asyncHandler(async (req, res) => {
     // check user privilege
-    if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const { paymentMethod, transactionIID, coupon, status, products, totalValue } = req.body

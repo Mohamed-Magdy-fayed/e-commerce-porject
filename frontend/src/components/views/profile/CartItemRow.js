@@ -4,23 +4,22 @@ import { deleteItemFromUser } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
 
 const CartItemRow = ({ product, setProductsTotal }) => {
-
     const { store, deleteFromLocation } = useContext(StoreContext)
 
     const [amount, setAmount] = useState(1)
 
-    const handleRemoveItem = (productID) => {
+    const handleRemoveItem = async (productID) => {
         deleteFromLocation(productID, 'cartItems')
-        deleteItemFromUser(store.auth.user._id, 'cartItems', productID)
-        setProductsTotal((prev) => {
-            const { [productID]: removedProperty, ...prevRest } = prev
-            return { ...prevRest }
-        })
+        await deleteItemFromUser(store.auth.token, store.auth.user._id, 'cartItems', productID)
+        setProductsTotal((prev) => prev.filter(product => productID !== product.productID))
     }
 
     useEffect(() => {
         setProductsTotal((prev) => {
-            return { ...prev, [product._id]: amount }
+            return prev.map(item => {
+                if (item.productID === product._id) return { ...item, amount: isNaN(amount) ? 0 : amount }
+                return item
+            })
         })
     }, [amount])
 
@@ -48,14 +47,12 @@ const CartItemRow = ({ product, setProductsTotal }) => {
                     <div className="relative flex flex-row w-full h-8">
                         <input
                             type="number"
+                            min={0}
                             className="w-full p-2 font-semibold text-center text-gray-700 bg-indigo-200 outline-none rounded-lg focus:outline-none hover:text-black focus:text-black"
                             onChange={(e) => {
-                                setProductsTotal((prev) => {
-                                    return { ...prev, [product._id]: e.target.value }
-                                })
                                 setAmount(parseInt(e.target.value))
                             }}
-                            value={amount}
+                            value={amount ? amount : 0}
                             required
                         />
                     </div>

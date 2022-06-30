@@ -1,4 +1,3 @@
-import axios from "axios"
 import { useContext, useEffect, useState } from "react"
 import { MdAdd, MdDelete, MdEdit } from "react-icons/md"
 import { addCouponsAction, deleteCouponsAction, editCouponsAction, getCouponsAction } from "../../../context/store/StoreActions"
@@ -14,7 +13,7 @@ const CouponsTool = () => {
 
   useEffect(() => {
     setLoading(true)
-    getCouponsAction().then((data) => {
+    getCouponsAction(store.auth.token).then((data) => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setData('coupons', [])
@@ -44,9 +43,9 @@ const CouponsTool = () => {
     }
 
     /* Send data to API to register a new user */
-    const newCoupon = await addCouponsAction(couponData)
+    const newCoupon = await addCouponsAction(store.auth.token, couponData)
     hideModal()
-    getCouponsAction().then(() => {
+    getCouponsAction(store.auth.token).then(() => {
       setReload(!reload)
       setLoading(false)
     })
@@ -83,9 +82,9 @@ const CouponsTool = () => {
     }
 
     /* Send data to API to register a new user */
-    const newCoupon = await editCouponsAction(couponData)
+    const newCoupon = await editCouponsAction(store.auth.token, couponData)
     hideModal()
-    getCouponsAction().then(() => {
+    getCouponsAction(store.auth.token).then(() => {
       setReload(!reload)
       setLoading(false)
     })
@@ -124,7 +123,7 @@ const CouponsTool = () => {
     setLoading(true)
     const cid = store.appData.coupons[index]._id
     /* Send data to API to register a new user */
-    await deleteCouponsAction(cid)
+    await deleteCouponsAction(store.auth.token, cid)
       .then(() => {
         setReload(!reload)
       })

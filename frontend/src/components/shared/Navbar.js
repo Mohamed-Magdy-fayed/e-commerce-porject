@@ -307,7 +307,7 @@ const Navbar = () => {
                 {/* Wish List */}
                 <div className="ml-4 flow-root lg:ml-6">
                   <Link
-                    to="/profile/:userId#wish-list"
+                    to={`/profile/${store.auth.user._id}`}
                     className="group -m-2 p-2 flex items-center"
                   >
                     <HeartIcon
@@ -324,7 +324,7 @@ const Navbar = () => {
                 {/* Cart */}
                 <div className="ml-4 flow-root lg:ml-6">
                   <Link
-                    to="/profile/:userId#cart"
+                    to={`/profile/${store.auth.user._id}`}
                     className="group -m-2 p-2 flex items-center"
                   >
                     <ShoppingBagIcon

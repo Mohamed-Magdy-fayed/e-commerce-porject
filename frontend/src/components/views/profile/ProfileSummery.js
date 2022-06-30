@@ -3,28 +3,42 @@ import { AiFillDelete } from "react-icons/ai";
 import { BiUserCircle } from "react-icons/bi";
 import { BsEnvelopeOpenFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
-import { editOrderAction, getOrderAction } from "../../../context/store/StoreActions";
+import { editOrderAction, getUserOrdersAction } from "../../../context/store/StoreActions";
 import StoreContext from '../../../context/store/StoreContext'
+import Spinner from "../../shared/Spinner";
 
 const ProfileSummery = () => {
 
   const { store, showModal } = useContext(StoreContext)
 
   const [orders, setOrders] = useState([])
-  const [loading, setLoading] = useState(false)
   const [reload, setReload] = useState(false)
-
-  const handleCancelOrder = (id) => {
-    setLoading(true)
-    editOrderAction({ id, status: 'canceled' }).then(res => {
-      console.log(res)
-      setReload(!reload)
-      setLoading(false)
-    })
-  }
 
   const showOrders = () => {
     const Component = () => {
+
+      const [loading, setLoading] = useState(false)
+
+      useEffect(() => {
+        setLoading(true)
+        setOrders([])
+        if (!store.auth.token || !store.auth.user._id) return
+        getUserOrdersAction(store.auth.token, store.auth.user._id).then(res => {
+          setOrders(res)
+          setLoading(false)
+        })
+      }, [store.auth, reload])
+      
+      const handleCancelOrder = (id) => {
+        setLoading(true)
+        editOrderAction(store.auth.token, { id, status: 'canceled' }).then(res => {
+          setReload(!reload)
+          setLoading(false)
+        })
+      }
+
+      if (loading) return <Spinner />
+
       return (
         <div className="grid place-items-center">
           <h3 className="text-xl font-medium text-gray-900 dark:text-white">Your orders</h3>
@@ -76,19 +90,6 @@ const ProfileSummery = () => {
 
     showModal(Component)
   }
-
-  useEffect(() => {
-    setOrders([])
-    store.auth.user.orders.map(id => {
-      getOrderAction(id).then(res => {
-        setOrders(prev => {
-          if (orders.includes(prev)) return
-          return [...prev, res]
-        })
-      })
-    })
-    showOrders()
-  }, [store.auth.user.orders, reload])
 
   return (
     <div

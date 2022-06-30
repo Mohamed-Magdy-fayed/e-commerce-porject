@@ -38,7 +38,7 @@ const ImagesTool = () => {
 
     /* Send data to API to add new image to the product */
     hideModal();
-    addImageAction(imageData).then(data => {
+    addImageAction(store.auth.token, imageData).then(data => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setLoading(false)
@@ -79,7 +79,7 @@ const ImagesTool = () => {
 
     /* Send data to API to register a new user */
     hideModal()
-    editImageAction(imageData).then(data => {
+    editImageAction(store.auth.token, imageData).then(data => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setLoading(false)
@@ -115,7 +115,7 @@ const ImagesTool = () => {
     setLoading(true)
     const imageID = store.appData.carousel[index]._id
     /* Send data to API to register a new user */
-    deleteImageAction(imageID).then(data => {
+    deleteImageAction(store.auth.token, imageID).then(data => {
       if (!data) {
         showToast('an error occurred, please try again', false)
         setLoading(false)

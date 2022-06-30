@@ -26,12 +26,12 @@ const Modal = () => {
             <div className="fixed z-10 w-full inset-0 h-modal md:h-full grid place-items-center">
                 <div className="p-4 w-full max-w-md h-full md:h-auto">
                     {/* Modal content */}
-                    <div className="custom-scrollbar relative bg-white rounded-lg shadow dark:bg-gray-700 h-[65%] overflow-y-scroll">
+                    <div className="custom-scrollbar relative bg-white rounded-lg shadow dark:bg-gray-700 h-[50%] overflow-y-scroll">
                         <div className="flex justify-end p-2">
                             <button onClick={() => {
                                 if (!store.productForm.isEdit && url === '/admin/dashboard/products') {
                                     hideModal()
-                                    deleteProductAction(store.productForm.id)
+                                    deleteProductAction(store.auth.token, store.productForm.id)
                                     setProductForm('', false)
                                 } else {
                                     hideModal()
