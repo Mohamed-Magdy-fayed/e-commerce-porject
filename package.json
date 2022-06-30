@@ -2,7 +2,7 @@
   "name": "e-commerce",
   "version": "1.0.0",
   "description": "e-commerce-platform",
-  "main": "/backend/server.js",
+  "main": "index.js",
   "scripts": {
     "start": "node backend/server.js",
     "server": "nodemon backend/server.js --watch backend --ignore frontend",
@@ -25,7 +25,6 @@
   },
   "devDependencies": {
     "concurrently": "^7.2.2",
-    "dotenv": "^16.0.1",
     "nodemon": "^2.0.16"
   }
 }
