@@ -9,7 +9,7 @@
     "client": "npm start --prefix frontend",
     "build": "npm run build --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "commit": "git add . && git commit -m \"auto commit\"",
+    "commit": "git add . && git commit -m \"auto commit\" && git push heroku main",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm i && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "keywords": [],
