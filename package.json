@@ -2,13 +2,14 @@
   "name": "e-commerce",
   "version": "1.0.0",
   "description": "e-commerce-platform",
+  "main": "backend/server.js",
   "scripts": {
     "start": "node backend/server.js",
     "server": "nodemon backend/server.js --watch backend --ignore frontend",
     "client": "npm start --prefix frontend",
     "build": "npm run build --prefix frontend",
     "dev": "concurrently \"npm run server\" \"npm run client\"",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=true npm install --prefix frontend && npm run build --prefix frontend"
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=true npm i && npm install --prefix frontend && npm run build --prefix frontend"
   },
   "keywords": [],
   "author": "Mohamed Magdy",
