@@ -2,7 +2,6 @@
   "name": "e-commerce",
   "version": "1.0.0",
   "description": "e-commerce-platform",
-  "main": "index.js",
   "scripts": {
     "start": "node backend/server.js",
     "server": "nodemon backend/server.js --watch backend --ignore frontend",

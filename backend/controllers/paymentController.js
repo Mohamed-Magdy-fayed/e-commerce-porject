@@ -55,8 +55,8 @@ const createPayment = asyncHandler(async (req, res) => {
             customer: req.user._id,
             customer_email: req.user.email,
             metadata: { "coupon": req.body.coupon, "products": JSON.stringify(products) },
-            success_url: `http://localhost:3000/profile/${req.user._id}/success`,
-            cancel_url: `http://localhost:3000/profile/${req.user._id}/cancel`,
+            success_url: `${process.env.API_URL}${req.user._id}/success`,
+            cancel_url: `${process.env.API_URL}${req.user._id}/cancel`,
         })
 
         res.status(200).json({ session })
