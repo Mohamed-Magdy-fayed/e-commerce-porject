@@ -2,6 +2,7 @@ import { useContext, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import StoreContext from "../../../context/store/StoreContext";
 import { loginUserAction } from "../../../context/store/StoreActions";
+import useResetPassword from "../../../hooks/useResetPassword";
 
 const LoginPage = () => {
   // Connect to context
@@ -9,7 +10,8 @@ const LoginPage = () => {
   const { store, setLoading, loginUser, showToast, hideModal } = useContext(StoreContext);
 
   const url = useLocation().pathname
-  const navigate = useNavigate();
+  const navigate = useNavigate()
+  const resetPassword = useResetPassword()
 
   // Form States
   const [email, setEmail] = useState("");
@@ -62,7 +64,7 @@ const LoginPage = () => {
 
   // Form on forgot password
   const forgetPassword = () => {
-    /* To Do hit password reset API */
+    resetPassword(true)
   };
 
   return (

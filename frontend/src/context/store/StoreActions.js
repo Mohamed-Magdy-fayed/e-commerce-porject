@@ -482,15 +482,15 @@ export const deleteItemFromUser = async (token, userID, location, itemID) => {
 }
 
 // Resets the user password
-export const resetPasswordAction = async (token, userID, oldPassword, newPassword) => {
+export const resetPasswordAction = async (email, oldPassword, newPassword) => {
     const config = {
         method: 'post',
-        url: `/api/users/userid${userID}`,
+        url: `/api/users/reset-password`,
         headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
         },
         data: {
+            email,
             oldPassword,
             newPassword
         }
@@ -499,6 +499,7 @@ export const resetPasswordAction = async (token, userID, oldPassword, newPasswor
     const res = await axios(config)
         .then(res => res)
         .catch(e => e.response)
+    console.log(res)
     return res.data
 }
 

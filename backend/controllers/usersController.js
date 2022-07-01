@@ -254,20 +254,19 @@ const deleteItemFromUser = asyncHandler(async (req, res) => {
 // @route   post /api/users/userid:id
 // @access  private
 const resetPassword = asyncHandler(async (req, res) => {
-  // check user privilege
-  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-  const { oldPassword, newPassword } = req.body
-  const { id } = req.params
+  const { email, oldPassword, newPassword } = req.body
+  
   // Check for user
-  const user = await User.findById(id)
-  if (!user || !(await bcrypt.compare(oldPassword, user.password))) return res.status(400).json({ error: 'incorrect old password' })
+  const user = await User.find({ email: email })
+  if (!user) return res.status(400).json({ error: 'incorrect email' })
+  if (!(await bcrypt.compare(oldPassword, user[0].password))) return res.status(400).json({ error: 'incorrect old password' })
 
   // Hash password
   const salt = await bcrypt.genSalt(10)
   const hashedPassword = await bcrypt.hash(newPassword, salt)
 
-  const data = await User.findOneAndUpdate({ _id: id }, {
+  const data = await User.findOneAndUpdate({ email: email }, {
     password: hashedPassword,
   }, {
     new: true
