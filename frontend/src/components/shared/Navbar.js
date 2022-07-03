@@ -16,6 +16,8 @@ const Navbar = () => {
   const [searchShow, setSearchShow] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
+  const [touchStart, setTouchStart] = useState(null)
+  const [touchEnd, setTouchEnd] = useState(null)
 
   const { store, logoutUser } = useContext(StoreContext);
 
@@ -95,7 +97,7 @@ const Navbar = () => {
                   </span>
                 </div>
 
-                <div className="flex flex-col w-[5px]">
+                <div className="flex flex-col">
                   <Link
                     to="/shop"
                     className="p-2 block font-medium text-gray-900 hover:bg-gray-100"

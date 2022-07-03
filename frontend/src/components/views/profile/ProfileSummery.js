@@ -5,20 +5,28 @@ import { BsEnvelopeOpenFill } from "react-icons/bs";
 import { Link } from "react-router-dom";
 import { editOrderAction, getUserOrdersAction } from "../../../context/store/StoreActions";
 import StoreContext from '../../../context/store/StoreContext'
+import useConfirm from '../../../hooks/useConfirm'
 import Spinner from "../../shared/Spinner";
 
 const ProfileSummery = () => {
 
-  const { store, showModal, setUserData, showToast } = useContext(StoreContext)
+  const { store, showModal, showToast } = useContext(StoreContext)
+  const { confirmAction } = useConfirm()
 
   const [reload, setReload] = useState(false)
 
   const showOrders = () => {
+
     const Component = () => {
       const [loading, setLoading] = useState(false)
+      const [orders, setOrders] = useState([])
 
       const handleCancelOrder = async (id) => {
         setLoading(true)
+
+        const isConfirmed = await confirmAction(`Please confirm to cancel the order ${id}`)
+        if (!isConfirmed) return setLoading(false)
+
         await editOrderAction(store.auth.token, { id, status: 'canceled' }).then(res => {
           if (res.error) return showToast(res.error, false)
           setReload(!reload)
@@ -31,10 +39,11 @@ const ProfileSummery = () => {
         if (!store.auth.token || !store.auth.user._id) return
         getUserOrdersAction(store.auth.token, store.auth.user._id).then(res => {
           if (res.error) return showToast(res.error, false)
-          setUserData('orders', res)
+
+          setOrders(res)
           setLoading(false)
         })
-      }, [reload, store.auth.user.orders])
+      }, [reload, store.auth])
 
       if (loading) return <Spinner />
 
@@ -42,7 +51,7 @@ const ProfileSummery = () => {
         <div className="relative grid place-items-center">
           <h3 className="text-xl font-medium text-gray-900 dark:text-white">Your orders</h3>
           <div className="flex flex-col gap-4 p-4">
-            {store.userData.orders.length === 0 ? <p>You don't have any orders yet</p> : store.userData.orders.map(order => (
+            {orders.length === 0 ? <p>You don't have any orders yet</p> : orders.map(order => (
               <div key={order._id} className="w-full border rounded-md px-4 py-2 shadow-sm flex items-center justify-around flex-wrap">
                 <div className="w-full">
                   <h4 className="text-lg font-medium text-gray-900 dark:text-white text-center m-4">Order details</h4>

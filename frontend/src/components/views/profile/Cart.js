@@ -125,7 +125,14 @@ const Cart = () => {
             <div className="my-4 mt-6 -mx-2 lg:flex">
               <div className="lg:px-2 lg:w-1/2">
                 <div className="p-4 bg-indigo-100 rounded-full">
-                  <h1 className="ml-2 font-bold uppercase">Coupon Code</h1>
+                  <h1 className="ml-2 font-bold uppercase">
+                    Coupon Code
+                    {coupon && (
+                      <span data-tooltip title={`${coupon.name} Get a ${coupon.value}${coupon.isPercentage ? `%` : '$'} off your orders with more than ${coupon.minValue}$ value`} className="text-xs text-gray-400 float-right mt-1">
+                        hover to see code details
+                      </span>
+                    )}
+                  </h1>
                 </div>
                 <div className="p-4">
                   <p className="mb-4 italic">
@@ -194,9 +201,9 @@ const Cart = () => {
                     </div>
                   </div>
                   <button
-                    disabled={total < 5}
+                    disabled={productsTotal.filter(p => p.amount === 0).length > 0}
                     onClick={() => handleCheckout()}
-                    className={`flex justify-center items-center w-full px-10 py-3 font-medium ${total < 5 ? 'text-white bg-slate-600 border-2 border-slate-600' : 'text-white bg-indigo-600 border-2 border-indigo-600 hover:bg-white hover:text-black focus:bg-white focus:text-black'} rounded-full outline-none transition-all duration-[350ms] ease-in-out uppercase shadow item-center  focus:outline-none`}
+                    className={`flex justify-center items-center w-full px-10 py-3 font-medium ${productsTotal.filter(p => p.amount === 0).length > 0 ? 'text-white bg-slate-600 border-2 border-slate-600' : 'text-white bg-indigo-600 border-2 border-indigo-600 hover:bg-white hover:text-black focus:bg-white focus:text-black'} rounded-full outline-none transition-all duration-[350ms] ease-in-out uppercase shadow item-center focus:outline-none`}
                   >
                     <BsFillCreditCard2FrontFill size={30} />
                     <span className="ml-2 mt-5px">Procceed to checkout</span>

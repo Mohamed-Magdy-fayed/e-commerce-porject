@@ -51,14 +51,14 @@ const Profile = ({ paymentStatus }) => {
         .then(async data => {
           const RenderSuccess = () => {
             return (
-              <div className="text-center p-5 text-green-600 bg-slate-100 rounded-md mt-4">
-                <div className="w-full flex flex-col items-center justify-around py-4">
+              <div className="w-full flex flex-col items-center justify-around py-4">
+                <div className="text-center p-5 text-green-600 bg-slate-100 rounded-md mt-4">
                   <h1>Your test payment of {data.session.amount_subtotal / 100}$ has succeeded</h1>
                   <h1>Your order is submitted with the ID {data.session.metadata.orderID}</h1>
-                  <button onClick={() => hideModal()} className="group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                    <span>Continue</span><BsArrowBarRight size={20}></BsArrowBarRight>
-                  </button>
                 </div>
+                <button onClick={() => hideModal()} className="my-4 group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                  <span>Continue</span><BsArrowBarRight size={20}></BsArrowBarRight>
+                </button>
               </div>
             )
           }
