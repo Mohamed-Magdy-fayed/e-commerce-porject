@@ -33,10 +33,14 @@ export const StoreProvider = ({ children }) => {
     },
     appData: {
       users: [],
-      branches: [],
-      brands: [],
       products: [],
-      categories: [],
+      coupons: [],
+      orders: [],
+      carousel: [],
+    },
+    userData: {
+      users: [],
+      products: [],
       coupons: [],
       orders: [],
       carousel: [],
@@ -121,6 +125,14 @@ export const StoreProvider = ({ children }) => {
     });
   }
 
+  const setUserData = (collection, res) => {
+    dispatch({
+      type: "SET_USER_DATA",
+      payload: res,
+      collection,
+    });
+  }
+
   const setProductForm = (productID, isEdit) => {
     dispatch({
       type: "SET_PRODUCT_FORM",
@@ -160,6 +172,7 @@ export const StoreProvider = ({ children }) => {
         addToLocation,
         deleteFromLocation,
         setData,
+        setUserData,
         setLoading,
         setProductForm,
       }}

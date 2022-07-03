@@ -219,6 +219,7 @@ export const addOrderAction = async (token, orderData) => {
         },
         data: orderData
     }
+    console.log(config);
     const res = await axios(config)
         .then(res => res)
         .catch(e => e.response)
@@ -410,6 +411,24 @@ export const addUserAction = async (userData) => {
     return res.data
 }
 
+// Add a user to the DB
+export const adminAddUserAction = async (token, userData) => {
+    /* Send data to API to add the user */
+    const config = {
+        method: 'post',
+        url: '/api/users/adduser',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        data: userData
+    }
+    const res = await axios(config)
+        .then(res => res)
+        .catch(e => e.response)
+    return res.data
+}
+
 // edit a user on the DB
 export const editUserAction = async (token, userData) => {
     /* Send data to API to add the user */
@@ -504,7 +523,7 @@ export const resetPasswordAction = async (email, oldPassword, newPassword) => {
 }
 
 // get a payment link
-export const getPaymentLink = async (token, products, coupon) => {
+export const getPaymentLink = async (token, data) => {
     const config = {
         method: 'post',
         url: `/api/payment/create`,
@@ -512,14 +531,14 @@ export const getPaymentLink = async (token, products, coupon) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        data: { products: products, coupon }
+        data: { data: data }
     }
-    console.log(config);
+    console.log(config)
     /* Send data to API to reset the password */
     const res = await axios(config)
         .then(res => res)
         .catch(e => e.response)
-    console.log(res.data);
+    console.log(res.data)
     return res.data
 }
 

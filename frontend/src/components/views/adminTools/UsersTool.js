@@ -1,7 +1,8 @@
 import { useContext, useEffect, useState } from 'react'
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md'
-import { addUserAction, deleteUserAction, editUserAction, getUsersAction } from '../../../context/store/StoreActions'
+import { addUserAction, adminAddUserAction, deleteUserAction, editUserAction, getUsersAction } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
+import useConfirm from '../../../hooks/useConfirm'
 import RegisterForm from '../../shared/forms/RegisterForm'
 import Spinner from '../../shared/Spinner'
 
@@ -12,11 +13,13 @@ const UsersTool = () => {
     const [loading, setLoading] = useState([])
     const [reload, setReload] = useState(false)
 
+    const { confirmAction } = useConfirm()
+
     useEffect(() => {
         setLoading(true)
         getUsersAction(store.auth.token).then((data) => {
-            if (data.message) {
-                showToast(data.message, false)
+            if (data.error) {
+                showToast(data.error, false)
                 setData('users', [])
                 setSearchResults([])
                 setLoading(false)
@@ -46,17 +49,18 @@ const UsersTool = () => {
             type: formStates.type,
             status: formStates.status,
         }
+        console.log(userData)
 
         /* Send data to API to register a new user */
-        const newUser = await addUserAction(store.auth.token, userData)
-        hideModal()
-        getUsersAction(store.auth.token).then(() => {
-            setReload(!reload)
-            setLoading(false)
-        })
+        await adminAddUserAction(store.auth.token, userData)
+            .then(data => {
+                console.log(data);
+                if (data.error) return showToast(data.error, false)
 
-        console.log(newUser);
-        return newUser
+                setReload(!reload)
+                hideModal()
+                setLoading(false)
+            })
     }
 
     // open the modal and fill it's content 
@@ -112,7 +116,7 @@ const UsersTool = () => {
     }
 
     // opens edit modal
-    const modalEdit = (id) => {
+    const modalEdit = async (id) => {
         const initStates = {
             id: store.appData.users[id]._id,
             firstName: store.appData.users[id].firstName,
@@ -138,18 +142,22 @@ const UsersTool = () => {
 
     const handleDelete = async (index) => {
         setLoading(true)
+        const userName = store.appData.users[index].firstName
+
+        const isConfirmed = await confirmAction(`Please confirm to delete user ${userName}`)
+        if (!isConfirmed) return setLoading(false)
+
         const userID = store.appData.users[index]._id
         /* Send data to API to register a new user */
         deleteUserAction(store.auth.token, userID).then(data => {
-            if (!data) {
-                showToast('an error occurred, please try again', false)
+            if (data.error) {
+                showToast(data.error, false)
                 setLoading(false)
                 return
-            } else {
-                setReload(!reload)
-                console.log(data)
-                setLoading(false)
             }
+
+            setReload(!reload)
+            setLoading(false)
         })
     }
 

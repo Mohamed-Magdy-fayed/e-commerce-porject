@@ -1,16 +1,16 @@
 import { useContext, useState } from "react"
-import { BsInfoCircle } from "react-icons/bs"
+import { BsArrowBarLeft, BsArrowBarRight, BsInfoCircle } from "react-icons/bs"
 import { addItemToUser, addOrderAction, getPaymentLink } from "../../../context/store/StoreActions"
 import StoreContext from "../../../context/store/StoreContext"
 
 const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
 
-    const [paymentMethod, setPaymentMethod] = useState('credit')
+    const [paymentMethod, setPaymentMethod] = useState('cash')
     const [success, setSuccess] = useState(false)
     const [orderID, setOrderID] = useState('')
     const [loading, setLoading] = useState(false)
 
-    const { store, deleteFromLocation, showToast } = useContext(StoreContext)
+    const { store, deleteFromLocation, showToast, addToLocation, hideModal } = useContext(StoreContext)
 
     const products = productsTotal.map(item => {
         return {
@@ -19,14 +19,32 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
         }
     })
 
-    const handleCardPayment = () => {
+    const handleCardPayment = async () => {
         setLoading(true)
-        getPaymentLink(store.auth.token, products, coupon && coupon._id)
+        const orderData = {
+            userID: store.auth.user._id,
+            paymentMethod: 'credit',
+            transactionID: null,
+            coupon: coupon ? coupon._id : null,
+            status: 'pending',
+            products: productsTotal,
+            totalValue: orderDetails.subTotal
+        }
+
+        await addOrderAction(store.auth.token, orderData)
             .then(data => {
                 if (data.error) return showToast(data.error, false)
-                localStorage.setItem('payment', JSON.stringify(data.session.id))
-                setLoading(false)
-                window.location = data.session.url
+
+                addItemToUser(store.auth.token, data.userID, 'orders', data._id)
+                addToLocation(data._id, 'orders')
+
+                getPaymentLink(store.auth.token, data)
+                    .then(data => {
+                        if (data.error) return showToast(data.error, false)
+                        localStorage.setItem('payment', JSON.stringify(data.session.id))
+                        setLoading(false)
+                        window.location = data.session.url
+                    })
             })
     }
 
@@ -38,22 +56,21 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
             coupon: coupon && coupon._id,
             status: 'processing',
             products,
-            totalValue: orderDetails.orderTotal
+            totalValue: orderDetails.subTotal
         }
+        console.log(data)
 
         addOrderAction(store.auth.token, data).then((res) => {
-            if (res) {
-                setSuccess(true)
-                setOrderID(res._id)
-                addItemToUser(store.auth.token, data.userID, 'orders', res._id)
-                products.forEach(product => {
-                    deleteFromLocation(product.productID, 'cartItems')
-                })
-                showToast(`thanks for your purchase your order status is currently ${res.status}`, true)
-            } else {
-                setSuccess(false)
-                showToast(`an error occured please try again later`)
-            }
+
+            if (res.error) return showToast(res.error, false)
+
+            setSuccess(true)
+            setOrderID(res._id)
+            addItemToUser(store.auth.token, data.userID, 'orders', res._id)
+            products.forEach(product => {
+                deleteFromLocation(product.productID, 'cartItems')
+            })
+            showToast(`thanks for your purchase your order status is currently ${res.status}`, true)
         })
     }
     return (
@@ -85,6 +102,7 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
                     </div>
                 </div>
                 <select
+                    disabled={success}
                     className="!ring-0 rounded-md border-2 border-slate-400 w-full p-3 focus:border-slate-400"
                     id="paymentMethod"
                     name="paymentMethod"
@@ -123,9 +141,17 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
                                 <h1>Your order submitted with the ID of {orderID}</h1>
                             </div>
                         )}
-                        <button disabled={success} onClick={() => sendData()} className={`flex justify-center items-center w-full px-10 py-3 mt-5 font-medium text-white bg-[rgb(253,128,36)] border-2 border-[rgb(253,128,36)] rounded-full outline-none transition-all duration-[350ms] ease-in-out hover:bg-white hover:text-black focus:bg-white focus:text-black uppercase  shadow item-center focus:outline-none ${success && 'bg-slate-300 border-0 hover:bg-slate-300 hover:text-white'}`}>
-                            Confirm Order
-                        </button>
+                        <div className="w-full flex items-center justify-around py-4">
+                            {success ? (
+                                <button onClick={() => hideModal()} className="group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                                    <span>Continue</span><BsArrowBarRight size={20}></BsArrowBarRight>
+                                </button>
+                            ) : (
+                                <button disabled={success} onClick={() => sendData()} className='group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'>
+                                    Confirm Order
+                                </button>
+                            )}
+                        </div>
                     </>
                 )}
             </div>

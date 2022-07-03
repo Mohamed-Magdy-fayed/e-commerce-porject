@@ -21,12 +21,12 @@ import Spinner from "./shared/Spinner";
 
 const App = () => {
   const { store } = useContext(StoreContext);
-  useProtect();
+  useProtect()
 
   if (store.loading) return <Spinner />
 
   return (
-    <div className="relative">
+    <div className="relative" id="app">
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<LoginPage />} />

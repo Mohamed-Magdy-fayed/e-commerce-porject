@@ -23,10 +23,10 @@ const Modal = () => {
     return (
         <div className='h-full w-full bg-slate-400 bg-opacity-50 absolute inset-0 z-10'>
             {/* Main modal */}
-            <div className="fixed z-10 w-full inset-0 h-modal md:h-full grid place-items-center">
-                <div className="p-4 w-full max-w-md h-full md:h-auto">
+            <div className="absolute z-10 w-full inset-0 grid place-items-center">
+                <div className="fixed top-0 p-4 w-full max-w-md h-screen">
                     {/* Modal content */}
-                    <div className="custom-scrollbar relative bg-white rounded-lg shadow dark:bg-gray-700 h-[50%] overflow-y-scroll">
+                    <div className="bg-white rounded-lg shadow dark:bg-gray-700">
                         <div className="flex justify-end p-2">
                             <button onClick={() => {
                                 if (!store.productForm.isEdit && url === '/admin/dashboard/products') {
@@ -41,7 +41,7 @@ const Modal = () => {
                             </button>
                         </div>
                         {/* gets the content you put at the app state */}
-                        {<store.modal.content />}
+                        <div className='max-h-[calc(100vh-6rem)] custom-scrollbar overflow-y-auto bg-white shadow dark:bg-gray-700 rounded-b-md'>{<store.modal.content />}</div>
                     </div>
                 </div>
             </div>

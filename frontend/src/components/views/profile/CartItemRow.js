@@ -65,7 +65,7 @@ const CartItemRow = ({ product, setProductsTotal }) => {
             </td>
             <td className="text-right">
                 <span className="text-sm lg:text-base font-medium">
-                    {product.price * amount}€
+                    {(product.price * amount).toFixed(2)}€
                 </span>
             </td>
         </tr>

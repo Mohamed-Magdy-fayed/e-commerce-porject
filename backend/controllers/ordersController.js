@@ -40,12 +40,12 @@ const addOrder = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    const { userID, paymentMethod, transactionIID, coupon, status, products, totalValue } = req.body
+    const { userID, paymentMethod, transactionID, coupon, status, products, totalValue } = req.body
 
     const newOrder = {
         userID,
         paymentMethod,
-        transactionIID,
+        transactionID,
         coupon,
         status,
         products,
@@ -87,7 +87,7 @@ const editOrder = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-    const { paymentMethod, transactionIID, coupon, status, products, totalValue } = req.body
+    const { paymentMethod, transactionID, coupon, status, products, totalValue } = req.body
     const id = req.params.id
 
     // Check for order
@@ -97,7 +97,7 @@ const editOrder = asyncHandler(async (req, res) => {
     // update order
     const data = await Orders.findOneAndUpdate({ _id: id }, {
         paymentMethod,
-        transactionIID,
+        transactionID,
         coupon,
         status,
         products,

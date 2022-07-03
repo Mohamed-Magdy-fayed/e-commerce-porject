@@ -9,44 +9,43 @@ import Spinner from "../../shared/Spinner";
 
 const ProfileSummery = () => {
 
-  const { store, showModal } = useContext(StoreContext)
+  const { store, showModal, setUserData, showToast } = useContext(StoreContext)
 
-  const [orders, setOrders] = useState([])
   const [reload, setReload] = useState(false)
 
   const showOrders = () => {
     const Component = () => {
-
       const [loading, setLoading] = useState(false)
 
-      useEffect(() => {
+      const handleCancelOrder = async (id) => {
         setLoading(true)
-        setOrders([])
-        if (!store.auth.token || !store.auth.user._id) return
-        getUserOrdersAction(store.auth.token, store.auth.user._id).then(res => {
-          setOrders(res)
-          setLoading(false)
-        })
-      }, [store.auth, reload])
-      
-      const handleCancelOrder = (id) => {
-        setLoading(true)
-        editOrderAction(store.auth.token, { id, status: 'canceled' }).then(res => {
+        await editOrderAction(store.auth.token, { id, status: 'canceled' }).then(res => {
+          if (res.error) return showToast(res.error, false)
           setReload(!reload)
           setLoading(false)
         })
       }
 
+      useEffect(() => {
+        setLoading(true)
+        if (!store.auth.token || !store.auth.user._id) return
+        getUserOrdersAction(store.auth.token, store.auth.user._id).then(res => {
+          if (res.error) return showToast(res.error, false)
+          setUserData('orders', res)
+          setLoading(false)
+        })
+      }, [reload, store.auth.user.orders])
+
       if (loading) return <Spinner />
 
       return (
-        <div className="grid place-items-center">
+        <div className="relative grid place-items-center">
           <h3 className="text-xl font-medium text-gray-900 dark:text-white">Your orders</h3>
           <div className="flex flex-col gap-4 p-4">
-            {orders.length === 0 ? <p>You don't have any orders yet</p> : orders.map(order => (
+            {store.userData.orders.length === 0 ? <p>You don't have any orders yet</p> : store.userData.orders.map(order => (
               <div key={order._id} className="w-full border rounded-md px-4 py-2 shadow-sm flex items-center justify-around flex-wrap">
                 <div className="w-full">
-                  <h4 className="text-lg font-medium text-gray-900 dark:text-white text-center">Order details</h4>
+                  <h4 className="text-lg font-medium text-gray-900 dark:text-white text-center m-4">Order details</h4>
                   <p className="flex justify-between text-indigo-800">Order ID: <span className="text-black">{order._id}</span></p>
                   <p className="flex justify-between text-indigo-800">value: <span className="text-black">$ {parseFloat(order.totalValue).toFixed(2)}</span></p>
                   <p className="flex justify-between text-indigo-800">status: <span className="text-black">{order.status}</span></p>
@@ -94,7 +93,7 @@ const ProfileSummery = () => {
   return (
     <div
       id="profile-summery"
-      className="md:w-1/2 grid place-items-center bg-white shadow rounded p-3 py-10 border-t-4 border-indigo-400 "
+      className=" w-full grid place-items-center bg-white shadow rounded p-3 py-10 border-t-4 border-indigo-400 "
     >
       <h2 className="text-gray-900 flex items-center text-2xl mb-4">
         <BiUserCircle size={30} className="mr-1" />

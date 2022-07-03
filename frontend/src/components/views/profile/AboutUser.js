@@ -59,7 +59,7 @@ const AboutUser = () => {
   }
 
   return (
-    <div className="bg-white px-3 py-10 shadow rounded border-t-4 border-indigo-400">
+    <div className="bg-white w-full px-3 py-10 shadow rounded border-t-4 border-indigo-400">
       <div className="flex items-center justify-between  text-gray-900 mb-4 text-2xl">
         <div className="flex">
           <span className="text-indigo-800">

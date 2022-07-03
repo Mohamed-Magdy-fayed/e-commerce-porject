@@ -8,6 +8,7 @@ const {
   resetPassword,
   getUsers,
   registerUser,
+  adminAddUser,
   loginUser,
   editUser,
   deleteUser,
@@ -25,6 +26,7 @@ router.get('/userid:id', protect, getUser)
 router.post('/login', loginUser)
 router.post('/reset-password', resetPassword)
 router.post('/register', registerUser)
+router.post('/adduser', protect, adminAddUser)
 router.put('/:id', protect, editUser)
 router.delete('/:id', protect, deleteUser)
 router.put('/:id/:location', protect, addItemToUser)

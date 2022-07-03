@@ -11,8 +11,9 @@ const createPayment = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    const products = req.body.products
-    const couponID = req.body.coupon
+    const orderID = req.body.data._id
+    const products = req.body.data.products
+    const couponID = req.body.data.coupon
 
     const getCoupon = async (id) => {
         const coupon = await Coupons.findById(id)
@@ -54,7 +55,7 @@ const createPayment = asyncHandler(async (req, res) => {
             line_items,
             customer: req.user._id,
             customer_email: req.user.email,
-            metadata: { "coupon": req.body.coupon, "products": JSON.stringify(products) },
+            metadata: { "orderID": orderID, "coupon": req.body.coupon, "products": JSON.stringify(products) },
             success_url: `${process.env.API_URL}profile/${req.user._id}/success`,
             cancel_url: `${process.env.API_URL}profile/${req.user._id}/cancel`,
         })

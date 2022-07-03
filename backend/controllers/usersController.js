@@ -64,7 +64,7 @@ const getUser = asyncHandler(async (req, res) => {
 })
 
 // @desc    Register new user
-// @route   POST /api/users
+// @route   POST /api/register
 // @access  Public
 const registerUser = asyncHandler(async (req, res) => {
   const { firstName,
@@ -73,8 +73,56 @@ const registerUser = asyncHandler(async (req, res) => {
     password,
     address,
     phone,
+  } = req.body
+
+  // Check if user exists
+  const userExists = await User.findOne({ email })
+  if (userExists) return res.status(400).json({ error: `user already exists` })
+
+  // Hash the password
+  const salt = await bcrypt.genSalt(10)
+  const hashedPassword = await bcrypt.hash(password, salt)
+
+  // Create user
+  const user = await User.create({
+    firstName,
+    lastName,
+    email,
+    password: hashedPassword,
+    address,
+    phone,
+    type: 'User',
+    status: 'Active',
+    cartItems: [],
+    wishlistItems: [],
+    orders: [],
+  })
+  if (!user) return res.status(500).json({ error: `unknowen server or DB error` })
+
+  res.status(201).json({
+    user,
+    token: generateToken(user._id),
+  })
+})
+
+// @desc    Admin add new user
+// @route   POST /api/adduser
+// @access  Public
+const adminAddUser = asyncHandler(async (req, res) => {
+  // check user privilege
+  if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
+  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+
+  const { firstName,
+    lastName,
+    email,
+    password,
+    address,
+    phone,
     type,
-    status } = req.body
+    status,
+  } = req.body
+
 
   // Check if user exists
   const userExists = await User.findOne({ email })
@@ -256,7 +304,7 @@ const deleteItemFromUser = asyncHandler(async (req, res) => {
 const resetPassword = asyncHandler(async (req, res) => {
 
   const { email, oldPassword, newPassword } = req.body
-  
+
   // Check for user
   const user = await User.find({ email: email })
   if (!user) return res.status(400).json({ error: 'incorrect email' })
@@ -289,6 +337,7 @@ module.exports = {
   resetPassword,
   getUsers,
   registerUser,
+  adminAddUser,
   loginUser,
   deleteUser,
   editUser,

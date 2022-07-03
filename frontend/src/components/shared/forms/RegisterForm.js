@@ -10,8 +10,9 @@ import StoreContext from '../../../context/store/StoreContext'
 
 const RegisterForm = ({ onSubmit, withPW, initStates, admin }) => {
 
-    const { store, setLoading } = useContext(StoreContext)
+    const { store } = useContext(StoreContext)
 
+    const [loading, setLoading] = useState(false)
     const [firstName, setFirstName] = useState(initStates ? initStates.firstName : '')
     const [lastName, setLastName] = useState(initStates ? initStates.lastName : '')
     const [email, setEmail] = useState(initStates ? initStates.email : '')
@@ -193,7 +194,7 @@ const RegisterForm = ({ onSubmit, withPW, initStates, admin }) => {
                 </div>
 
                 <div className='flex justify-center'>
-                    {store.loading
+                    {loading
                         ? (<button
                             disabled
                             type="submit"

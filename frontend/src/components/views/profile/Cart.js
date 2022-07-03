@@ -53,8 +53,8 @@ const Cart = () => {
     setTotal(sum.length > 0 ? sum.reduce((a, b) => a + b).toFixed(2) : 0)
     if (!coupon) return setOrderDetails({ subTotal: parseFloat(total) })
 
-    const discountValue = coupon ? parseInt(coupon.value) : 0
-    const subTotal = coupon.isPercentage ? total - (discountValue/100 * total) : total - discountValue
+    const discountValue = coupon.isPercentage ? parseInt(coupon.value) / 100 * total : parseInt(coupon.value)
+    const subTotal = total - discountValue
     setOrderDetails({ discountValue, subTotal: parseFloat(subTotal) })
   }, [productsTotal, coupon])
 
@@ -163,10 +163,6 @@ const Cart = () => {
                   <h1 className="ml-2 font-bold uppercase">Order Details</h1>
                 </div>
                 <div className="p-4">
-                  <p className="mb-6 italic">
-                    Shipping and additionnal costs are calculated based on
-                    values you have entered
-                  </p>
                   <div className="flex justify-between border-b">
                     <div className="lg:px-4 lg:py-2 m-2 text-lg lg:text-xl font-bold text-center text-gray-800">
                       Total
