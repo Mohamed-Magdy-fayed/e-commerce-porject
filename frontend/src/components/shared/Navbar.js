@@ -16,8 +16,6 @@ const Navbar = () => {
   const [searchShow, setSearchShow] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState([]);
-  const [touchStart, setTouchStart] = useState(null)
-  const [touchEnd, setTouchEnd] = useState(null)
 
   const { store, logoutUser } = useContext(StoreContext);
 
@@ -105,22 +103,10 @@ const Navbar = () => {
                     Shop
                   </Link>
                   <Link
-                    to="/discover"
-                    className="p-2 block font-medium text-gray-900 hover:bg-gray-100"
-                  >
-                    Discover
-                  </Link>
-                  <Link
                     to="/help"
                     className="p-2 block font-medium text-gray-900 hover:bg-gray-100"
                   >
                     Help
-                  </Link>
-                  <Link
-                    to="/special"
-                    className="p-2 block font-medium text-gray-900 hover:bg-gray-100"
-                  >
-                    Special Offers
                   </Link>
                 </div>
 
@@ -206,22 +192,10 @@ const Navbar = () => {
                     Shop
                   </Link>
                   <Link
-                    to="/discover"
-                    className="text-lg font-medium text-gray-700 hover:text-gray-900"
-                  >
-                    Discover
-                  </Link>
-                  <Link
                     to="/help"
                     className="text-lg font-medium text-gray-700 hover:text-gray-900"
                   >
                     Help
-                  </Link>
-                  <Link
-                    to="/special"
-                    className="text-lg font-medium text-gray-700 hover:text-gray-900"
-                  >
-                    Special Offers
                   </Link>
                 </div>
                 {store.auth.authed ? (
@@ -280,7 +254,7 @@ const Navbar = () => {
                       />
                       <div className="z-10 absolute border rounded-b-md w-full bg-white flex flex-col">
                         {searchResults.slice(0, 5).map(product => (
-                          <Link key={product._id} to={`/product/${product._id}`} className="block px-3 py-2 hover:bg-slate-50">{product.name}</Link>
+                          <Link key={product._id} to={`/shop/${searchQuery}`} className="block px-3 py-2 hover:bg-slate-50">{product.name}</Link>
                         ))}
                       </div>
                     </div>

@@ -6,32 +6,32 @@ import CouponsForm from "../../shared/forms/CouponsForm"
 import Spinner from "../../shared/Spinner"
 
 const CouponsTool = () => {
-  const { store, showModal, hideModal, setData, showToast, setLoading } = useContext(StoreContext)
+  const { store, showModal, hideModal, setData, showToast } = useContext(StoreContext)
 
+  const [loading, setLoading] = useState([])
   const [searchResults, setSearchResults] = useState([])
   const [reload, setReload] = useState(false)
 
   useEffect(() => {
     setLoading(true)
     getCouponsAction(store.auth.token).then((data) => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
+      if (data.error) {
+        showToast(data.error, false)
         setData('coupons', [])
         setSearchResults([])
         setLoading(false)
-      } else {
-        setData('coupons', data)
-        setSearchResults(data)
-        setLoading(false)
+        return
       }
+
+      setData('coupons', data)
+      setSearchResults(data)
+      setLoading(false)
     })
   }, [reload])
 
   // submit the add form
   const handleAddSubmit = async (formStates) => {
-
     setLoading(true)
-
     const couponData = {
       name: formStates.name,
       applyOnCash: formStates.applyOnCash,
@@ -43,14 +43,13 @@ const CouponsTool = () => {
     }
 
     /* Send data to API to register a new user */
-    const newCoupon = await addCouponsAction(store.auth.token, couponData)
-    hideModal()
-    getCouponsAction(store.auth.token).then(() => {
+    await addCouponsAction(store.auth.token, couponData).then(data => {
+      if (data.error) return showToast(data.error, false)
+
       setReload(!reload)
+      hideModal()
       setLoading(false)
     })
-
-    return newCoupon
   }
 
   // open the modal and fill it's content 
@@ -73,7 +72,6 @@ const CouponsTool = () => {
     const couponData = {
       id: formStates.id,
       name: formStates.name,
-      applyOnCash: formStates.applyOnCash,
       isPercentage: formStates.isPercentage,
       value: formStates.value,
       isActive: formStates.isActive,
@@ -82,15 +80,13 @@ const CouponsTool = () => {
     }
 
     /* Send data to API to register a new user */
-    const newCoupon = await editCouponsAction(store.auth.token, couponData)
-    hideModal()
-    getCouponsAction(store.auth.token).then(() => {
+    await editCouponsAction(store.auth.token, couponData).then(data => {
+      if (data.error) return showToast(data.error, false)
+
       setReload(!reload)
+      hideModal()
       setLoading(false)
     })
-
-    console.log(newCoupon);
-    return newCoupon
   }
 
   // opens edit modal
@@ -124,14 +120,15 @@ const CouponsTool = () => {
     const cid = store.appData.coupons[index]._id
     /* Send data to API to register a new user */
     await deleteCouponsAction(store.auth.token, cid)
-      .then(() => {
+      .then((data) => {
+        if (data.error) return showToast(data.error, false)
         setReload(!reload)
       })
   }
 
   return (
     <>
-      {store.loading
+      {loading
         ? (
           <Spinner />
         )

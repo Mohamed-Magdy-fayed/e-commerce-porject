@@ -1,5 +1,4 @@
-import React, { useContext, useState } from "react";
-import StoreContext from "../../../context/store/StoreContext";
+import { useState } from "react";
 import Upload from "../../../firebase/upload";
 
 /**
@@ -8,7 +7,6 @@ import Upload from "../../../firebase/upload";
  */
 
 const ImagesForm = ({ onSubmit, initStates }) => {
-  const { store } = useContext(StoreContext);
 
   const [loading, setLoading] = useState(false);
   const [imageURL, setImageURL] = useState(initStates ? initStates.imageURL : '');
@@ -65,7 +63,7 @@ const ImagesForm = ({ onSubmit, initStates }) => {
         </div>
 
         <div className="flex justify-center">
-          {store.loading ? (
+          {loading ? (
             <button
               disabled
               type="submit"

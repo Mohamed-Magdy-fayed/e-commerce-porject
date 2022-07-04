@@ -6,10 +6,10 @@ import Spinner from '../Spinner'
 
 const OrdersForm = ({ initStates, onSubmit }) => {
     const { store, showToast } = useContext(StoreContext)
+    console.log(initStates);
 
     const [paymentMethod, setPaymentMethod] = useState(initStates ? initStates.paymentMethod : 'cash')
     const [coupons, setCoupons] = useState([])
-    const [totalValue, setTotalValue] = useState(initStates ? initStates.totalValue : 0)
     const [coupon, setCoupon] = useState(initStates ? initStates.coupon : {})
     const [status, setStatus] = useState(initStates ? initStates.status : 'pending')
     const [products, setProducts] = useState([])

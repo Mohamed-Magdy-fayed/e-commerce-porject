@@ -28,7 +28,6 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
             coupon: coupon ? coupon._id : null,
             status: 'pending',
             products: productsTotal,
-            totalValue: orderDetails.subTotal
         }
 
         await addOrderAction(store.auth.token, orderData)

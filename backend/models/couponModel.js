@@ -10,10 +10,6 @@ const couponsSchema = mongoose.Schema(
             type: Number,
             required: [true, 'Please add validTill'],
         },
-        applyOnCash: {
-            type: Boolean,
-            required: [true, 'Please add applyOnCash'],
-        },
         isPercentage : {
             type: Boolean,
             required: [true, 'Please add isPercentage'],

@@ -22,6 +22,13 @@ const createPayment = asyncHandler(async (req, res) => {
 
     const coupon = await getCoupon(couponID)
 
+    let productsArray = []
+    for (let index = 0; index < products.length; index++) {
+        const product = await Product.findById(products[index].productID)
+        productsArray.push(product.price * products[index].amount)
+    }
+    const orderTotal = parseFloat(productsArray.length > 0 ? productsArray.reduce((a, b) => a + b).toFixed(2) : 0)
+
     const getProduct = async (product) => {
         const storeItem = await Product.findById(product.productID)
         const discount = coupon && coupon.value
@@ -29,13 +36,22 @@ const createPayment = asyncHandler(async (req, res) => {
             ? (storeItem.price * 100) - ((storeItem.price * 100) * discount / 100)
             : (storeItem.price * 100) - discount
 
+        let isError = false
+
+        if (coupon) {
+            if (!coupon) isError = true
+            if (coupon.validTill < Date.now()) isError = true
+            if (!coupon.isActive) isError = true
+            if (orderTotal < coupon.minValue) isError = true
+        }
+
         return {
             price_data: {
                 currency: 'usd',
                 product_data: {
                     name: storeItem.name
                 },
-                unit_amount: parseInt(amount)
+                unit_amount: isError ? (storeItem.price * 100) : parseInt(amount)
             },
             quantity: product.amount
         }

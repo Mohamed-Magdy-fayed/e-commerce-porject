@@ -16,9 +16,9 @@ const storage = getStorage();
  * advanced we can have firebase check if the filename exists and warn the user
  */
 
-const ImageInput = ({ id, setImages, init }) => {
+const ImageInput = ({ id, setImages, init, setLoading }) => {
 
-    const { showToast, store, setLoading } = useContext(StoreContext)
+    const { showToast, store } = useContext(StoreContext)
 
     const [isRunning, setIsRunning] = useState(false);
     const [progress, setProgress] = useState(0);

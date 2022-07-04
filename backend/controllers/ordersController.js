@@ -2,6 +2,8 @@
 const asyncHandler = require('express-async-handler')
 // mongoDB model
 const Orders = require('../models/ordersModel')
+const Products = require('../models/productsModel')
+const Coupons = require('../models/couponModel')
 
 // @desc    get all the orders
 // @route   GET /api/orders
@@ -33,6 +35,32 @@ const getUserOrders = asyncHandler(async (req, res) => {
     res.status(200).json(data)
 })
 
+// validate the order total value
+const validateOrder = async (products, coupon) => {
+    let productsArray = []
+    for (let index = 0; index < products.length; index++) {
+        const product = await Products.findById(products[index].productID)
+        productsArray.push(product.price * products[index].amount)
+    }
+    const orderTotal = parseFloat(productsArray.length > 0 ? productsArray.reduce((a, b) => a + b).toFixed(2) : 0)
+    
+    if (!coupon) return { totalValue: orderTotal }
+
+    const data = await Coupons.findById(coupon)
+
+    if (!data) return { error: `not a valid coupon` }
+    if (data.validTill < Date.now()) return { error: `coupon expired` }
+    if (!data.isActive) return { error: `invalid coupon` }
+    if (orderTotal < data.minValue) return { error: `order value is low` }
+
+    const discountValue = parseInt(data.value)
+    const isPercentage = data.isPercentage
+
+    const totalValue = (isPercentage ? orderTotal - (orderTotal * discountValue / 100) : orderTotal - discountValue).toFixed(2)
+
+    return { totalValue }
+}
+
 // @desc    Add new order
 // @route   POST /api/orders
 // @access  private
@@ -40,7 +68,10 @@ const addOrder = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
-    const { userID, paymentMethod, transactionID, coupon, status, products, totalValue } = req.body
+    const { userID, paymentMethod, transactionID, coupon, status, products } = req.body
+
+    const orderValidation = await validateOrder(products, coupon)
+    if (orderValidation.error) return res.status(400).json({ error: orderValidation.error })
 
     const newOrder = {
         userID,
@@ -49,7 +80,7 @@ const addOrder = asyncHandler(async (req, res) => {
         coupon,
         status,
         products,
-        totalValue,
+        totalValue: orderValidation.totalValue
     }
 
     // create the order
