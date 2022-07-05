@@ -3,7 +3,7 @@ import AboutUser from "./AboutUser";
 import Cart from "./Cart";
 import WishList from "./WishList";
 import { useContext, useEffect, useState } from "react";
-import { addItemToUser, addOrderAction, editOrderAction, getPaymentSession, getUserOrdersAction } from "../../../context/store/StoreActions";
+import { editOrderAction, getPaymentSession, getUserOrdersAction } from "../../../context/store/StoreActions";
 import StoreContext from "../../../context/store/StoreContext";
 import Spinner from "../../shared/Spinner";
 import { useNavigate } from "react-router-dom";
@@ -12,7 +12,6 @@ import { BsArrowBarRight } from "react-icons/bs";
 const Profile = ({ paymentStatus }) => {
 
   const [loading, setLoading] = useState(false)
-  const [orderID, setOrderID] = useState(false)
 
   const { store, showModal, deleteFromLocation, showToast, setUserData, hideModal } = useContext(StoreContext)
 
@@ -20,24 +19,21 @@ const Profile = ({ paymentStatus }) => {
 
   const confirmOrderCredit = async (session, order) => {
     setLoading(true)
-    setOrderID(order._id)
 
     const data = {
       id: order._id,
       transactionID: session.payment_intent,
       status: 'processing',
     }
-    console.log(data)
 
     await editOrderAction(store.auth.token, data).then(async (res) => {
-      console.log(res)
       if (res.error) {
         showToast(res.error)
         setLoading(false)
         return
       }
 
-      order.products.map(product => {
+      order.products.forEach(product => {
         deleteFromLocation(product.productID, 'cartItems')
       })
       setLoading(false)
@@ -65,19 +61,17 @@ const Profile = ({ paymentStatus }) => {
 
           const orders = await getUserOrdersAction(store.auth.token, store.auth.user._id)
           setUserData('orders', orders)
-          console.log(orders, data.session.payment_intent)
           if (orders.filter(order => data.session.payment_intent === order.transactionID).length > 0) return navigate(`/profile/${store.auth.user._id}`)
 
           if (data.session.payment_status === "paid") {
             const order = orders.filter(order => data.session.metadata.orderID === order._id)[0]
-            console.log(order)
-            setOrderID(order._id)
             await confirmOrderCredit(data.session, order)
             showModal(RenderSuccess)
             navigate(`/profile/${store.auth.user._id}`)
           }
         })
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentStatus, store.auth.token])
 
   if (loading) return <Spinner />

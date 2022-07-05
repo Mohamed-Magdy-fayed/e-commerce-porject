@@ -26,6 +26,7 @@ const ImagesTool = () => {
       setData('carousel', res)
       setLoading(false)
     })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload])
 
   // submit the add form
@@ -124,6 +125,16 @@ const ImagesTool = () => {
             Images Data
           </h1>
           <div className="max-w-7xl px-6">
+            <div className="p-4 flex justify-center w-full">
+              <button
+                onClick={() => modalAdd()}
+                type="button"
+                className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white"
+                data-modal-toggle="authentication-modal"
+              >
+                <MdAdd size={30}></MdAdd> Add Image
+              </button>
+            </div>
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
               <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">

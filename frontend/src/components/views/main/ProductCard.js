@@ -37,7 +37,7 @@ const ProductCard = ({ productData }) => {
   }
 
   return (
-    <div className="flex flex-col justify-between w-40 text-left text-dark font-bold snap-start select-none">
+    <div className="flex flex-col justify-between w-60 shadow-md p-4 rounded-md text-left text-dark font-bold snap-start select-none">
       {/*product image and link*/}
       <div>
         <button disabled={loading} onClick={() => handleAddToLocation('wishlistItems')} className="flex items-center z-10">

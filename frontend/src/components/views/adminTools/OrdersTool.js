@@ -46,6 +46,7 @@ const OrdersTool = () => {
       setSearchResults(data)
       setLoading(false)
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload])
 
   // submit the edit form

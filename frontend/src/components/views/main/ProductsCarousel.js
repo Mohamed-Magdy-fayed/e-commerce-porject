@@ -1,7 +1,7 @@
 import React from "react";
 import ProductCard from "./ProductCard";
 
-export default function ProductsCarousel(props) {
+const ProductsCarousel = (props) => {
   const productsData = props.products;
   return (
     <div className="w-full my-20 px-8 ">
@@ -15,7 +15,7 @@ export default function ProductsCarousel(props) {
           <p>no products to show right now</p>
         </div>
       ) : (
-        <div className="custom-scrollbar max-w-[1250px] grid auto-cols-[minmax(300px,_1fr)] auto-rows-max grid-flow-col gap-8 mx-auto my-8 w-full overflow-x-auto snap-x scroll-px-8 overscroll-x-contain">
+        <div className="p-8 custom-scrollbar max-w-[1250px] grid auto-cols-[minmax(300px,_1fr)] auto-rows-max grid-flow-col gap-8 mx-auto my-8 w-full overflow-x-auto snap-x scroll-px-8 overscroll-x-contain">
           {/*products carousel Cards*/}
           {productsData.map((product, index) => (
             <ProductCard key={index} productData={product} />
@@ -25,3 +25,5 @@ export default function ProductsCarousel(props) {
     </div>
   );
 }
+
+export default ProductsCarousel

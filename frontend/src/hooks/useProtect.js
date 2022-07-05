@@ -5,8 +5,8 @@ import StoreContext from "../context/store/StoreContext";
 
 export const useProtect = () => {
     const navigate = useNavigate();
-    const { loginUser, logoutUser, setLoading, showToast, store } = useContext(StoreContext);
-    const url = useLocation().pathname;
+    const { loginUser, logoutUser, setLoading, showToast } = useContext(StoreContext);
+    const url = useLocation().pathname
 
     const checkAuth = () => {
         setLoading(true)
@@ -15,14 +15,14 @@ export const useProtect = () => {
             const { id, token } = JSON.parse(checkToken)
             getUserAction(token, id).then(res => {
                 if (res.error) return showToast(res.error, false)
-                
+
                 const userData = {
                     user: res,
                     token,
                 }
-                console.log(userData);
                 loginUser(userData)
                 setLoading(false)
+                showToast(`Welcome ${res.firstName}`, true)
                 if (url === '/login' || url === '/register') {
                     navigate('/')
                 }

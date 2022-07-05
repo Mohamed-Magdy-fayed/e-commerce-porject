@@ -1,6 +1,4 @@
 import { useContext, useEffect, useState } from "react";
-import { StarIcon } from "@heroicons/react/solid";
-import { classNames } from "./className";
 import { Swiper, SwiperSlide } from "swiper/react";
 //Ripples is lib. for ripples effects while clicking items
 // Import Swiper styles
@@ -10,10 +8,8 @@ import "swiper/css/navigation";
 import { Navigation } from "swiper";
 import { AiFillHeart, AiOutlineHeart } from "react-icons/ai";
 import { useLocation } from "react-router";
-import axios from "axios";
 import StoreContext from "../../../context/store/StoreContext";
 import Spinner from "../../shared/Spinner";
-import { Link } from "react-router-dom";
 import LoginPage from "../authorization/LoginPage";
 import { addItemToUser, deleteItemFromUser, getProductAction } from "../../../context/store/StoreActions";
 
@@ -39,6 +35,7 @@ const Product = () => {
       setProduct(data)
       setPageLoading(false)
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAddToLocation = async (location) => {

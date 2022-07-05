@@ -1,7 +1,5 @@
-import { async } from '@firebase/util'
-import { SearchIcon, XIcon } from '@heroicons/react/outline'
 import { useContext, useEffect, useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
 import { searchProductsAction } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
 import useDebounce from '../../../hooks/useDebounce'
@@ -11,7 +9,7 @@ import ProductCard from './ProductCard'
 
 export const Shop = () => {
 
-  const { store, showToast, setData } = useContext(StoreContext)
+  const { showToast, setData } = useContext(StoreContext)
 
   const [searchQuery, setSearchQuery] = useState(useLocation().pathname.split('shop/')[1])
   const [searchResults, setSearchResults] = useState([]);
@@ -28,12 +26,12 @@ export const Shop = () => {
 
   useEffect(() => {
     searchProductsAction(searchQuery ? searchQuery : undefined).then(data => {
-      console.log(data);
       if (data.error) return showToast(data.error, false)
 
       setSearchResults(data)
       setData('products', data)
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (

@@ -1,5 +1,3 @@
-import { logger } from "../middleware/logger"
-
 const storeReducer = (state, action) => {
     switch (action.type) {
         case 'LOGIN_USER':
@@ -52,7 +50,6 @@ const storeReducer = (state, action) => {
                 }
             }
         case 'SET_LOADING':
-            logger(state, action)
             return {
                 ...state,
                 loading: action.payload,

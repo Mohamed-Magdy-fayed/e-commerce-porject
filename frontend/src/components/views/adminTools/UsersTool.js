@@ -35,7 +35,6 @@ const UsersTool = () => {
     useEffect(() => {
         setLoading(true)
         getUsersAction(store.auth.token).then((data) => {
-            console.log(data);
             if (data.error) {
                 showToast(data.error, false)
                 setData('users', [])
@@ -47,6 +46,7 @@ const UsersTool = () => {
                 setLoading(false)
             }
         })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [store.productForm, reload])
 
 

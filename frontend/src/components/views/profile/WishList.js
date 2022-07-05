@@ -45,7 +45,7 @@ const WishList = () => {
       </div>
 
       <div className="flex flex-col jusitfy-start items-start">
-        <div className=" mt-10 lg:mt-12 grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-10 lg:gap-y-0">
+        <div className="mt-10 lg:mt-12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10 lg:gap-y-0">
           {wishlist.length === 0 ? (
             <p>no products in your wishlist</p>
           ) : (

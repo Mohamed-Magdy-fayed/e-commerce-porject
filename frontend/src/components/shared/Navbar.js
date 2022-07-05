@@ -1,4 +1,4 @@
-import { Fragment, useContext, useEffect, useState } from "react";
+import { Fragment, useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Dialog, Transition } from "@headlessui/react";
 import {
@@ -27,7 +27,7 @@ const Navbar = () => {
       if (query.length === 0) {
         return store.appData.products.slice(0, 5)
       } else {
-        return store.appData.products.filter(p => p.name.toLowerCase().includes(query)).slice(0, 5)
+        return store.appData.products.filter(p => p.name.toLowerCase().includes(query.toLowerCase())).slice(0, 5)
       }
     })
   }
@@ -174,7 +174,7 @@ const Navbar = () => {
               {/* Logo */}
               <div className="ml-4 flex lg:ml-0">
                 <Link to="/">
-                  <span className="sr-only">Workflow</span>
+                  <span className="sr-only">Home</span>
                   <img
                     className="h-8 w-auto"
                     src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"

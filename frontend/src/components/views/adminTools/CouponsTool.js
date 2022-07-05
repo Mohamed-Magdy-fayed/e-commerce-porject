@@ -47,6 +47,7 @@ const CouponsTool = () => {
       setSearchResults(data)
       setLoading(false)
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload])
 
   // submit the add form

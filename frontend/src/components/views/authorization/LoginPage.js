@@ -3,10 +3,12 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import StoreContext from "../../../context/store/StoreContext";
 import { loginUserAction } from "../../../context/store/StoreActions";
 import useResetPassword from "../../../hooks/useResetPassword";
+import { useProtect } from "../../../hooks/useProtect";
 
 const LoginPage = () => {
-  // Connect to context
+  useProtect()
 
+  // Connect to context
   const { store, setLoading, loginUser, showToast, hideModal } = useContext(StoreContext);
 
   const url = useLocation().pathname
@@ -59,9 +61,6 @@ const LoginPage = () => {
 
   };
 
-  // Form on forgot username
-  const forgetUsername = () => { };
-
   // Form on forgot password
   const forgetPassword = () => {
     resetPassword(true)
@@ -69,11 +68,20 @@ const LoginPage = () => {
 
   return (
     <>
-      <div className="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-md w-full space-y-8">
           <div>
-            <h2 className="text-center text-1xl">Logo</h2>
-            {/* ToDo add logo*/}
+            {/* Logo */}
+            <div className="ml-4 flex lg:ml-0 justify-center">
+              <Link to="/">
+                <span className="sr-only">Workflow</span>
+                <img
+                  className="h-8 w-auto"
+                  src="https://tailwindui.com/img/logos/workflow-mark.svg?color=indigo&shade=600"
+                  alt=""
+                />
+              </Link>
+            </div>
             <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
               Log in to your account
             </h2>
@@ -144,7 +152,7 @@ const LoginPage = () => {
               <div className="flex flex-row space-x-5 p-4">
                 <div className="text-sm">
                   <button
-                    onClick={() => forgetUsername()}
+                    onClick={() => forgetPassword()}
                     type="button"
                     className="font-medium text-indigo-600 hover:text-indigo-500"
                   >

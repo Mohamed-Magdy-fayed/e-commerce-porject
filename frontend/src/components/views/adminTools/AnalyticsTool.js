@@ -39,6 +39,7 @@ export const AnalyticsTool = () => {
         setLoading(false)
       }
     })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -119,7 +120,6 @@ export const AnalyticsTool = () => {
                       </td>
                       <td className="px-6 py-4 hidden xl:table-cell">
                         <p>
-                          {console.log(store.appData.products)}
                           {store.appData.products.filter(p => p.images.filter(i => i.length > 0) === 0).length} With no image
                         </p>
                       </td>

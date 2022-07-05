@@ -1,5 +1,5 @@
 import { useContext, useState } from "react"
-import { BsArrowBarLeft, BsArrowBarRight, BsInfoCircle } from "react-icons/bs"
+import { BsArrowBarRight, BsInfoCircle } from "react-icons/bs"
 import { addItemToUser, addOrderAction, getPaymentLink } from "../../../context/store/StoreActions"
 import StoreContext from "../../../context/store/StoreContext"
 
@@ -57,7 +57,6 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
             products,
             totalValue: orderDetails.subTotal
         }
-        console.log(data)
 
         addOrderAction(store.auth.token, data).then((res) => {
 
