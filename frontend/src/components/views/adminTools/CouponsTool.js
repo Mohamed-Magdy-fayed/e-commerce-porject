@@ -1,5 +1,5 @@
 import { useContext, useEffect, useState } from "react"
-import { MdAdd, MdDelete, MdEdit } from "react-icons/md"
+import { MdAdd, MdArrowDropDown, MdDelete, MdEdit } from "react-icons/md"
 import { addCouponsAction, deleteCouponsAction, editCouponsAction, getCouponsAction } from "../../../context/store/StoreActions"
 import StoreContext from "../../../context/store/StoreContext"
 import useConfirm from "../../../hooks/useConfirm"
@@ -9,11 +9,28 @@ import Spinner from "../../shared/Spinner"
 const CouponsTool = () => {
   const { store, showModal, hideModal, setData, showToast } = useContext(StoreContext)
 
+  const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState([])
   const [searchResults, setSearchResults] = useState([])
   const [reload, setReload] = useState(false)
 
   const { confirmAction } = useConfirm()
+
+  const sorter = (array) => {
+    return array.sort(((a, b) => {
+      let x = a[filter].toLowerCase()
+      let y = b[filter].toLowerCase()
+      return x === y ? 0 : x > y ? 1 : -1;
+    }))
+  }
+
+  const handleSearch = (query) => {
+    if (query.length > 0) {
+      setSearchResults(sorter(store.appData.coupons.filter(coupon => coupon[filter].toLowerCase().includes(query.toLowerCase()))))
+    } else {
+      setSearchResults(sorter(store.appData.coupons))
+    }
+  }
 
   useEffect(() => {
     setLoading(true)
@@ -139,7 +156,7 @@ const CouponsTool = () => {
         : (
           <div className='grid place-items-center'>
             <h1 className='text-left text-xl font-medium p-6 text-gray-700'>Coupons Data</h1>
-            <div className='max-w-2xl px-6'>
+            <div className='max-w-7xl px-6'>
               <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                 <div className="p-4 flex">
                   <label htmlFor="table-search" className="sr-only">Search</label>
@@ -148,16 +165,11 @@ const CouponsTool = () => {
                       <svg className="w-5 h-5 text-gray-500 dark:text-gray-400" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
                     </div>
                     <input
-                      onChange={(e) => {
-                        if (e.target.value !== '') {
-                          setSearchResults(store.appData.coupons.filter(coupon => coupon.name.toLowerCase().includes(e.target.value)))
-                        } else {
-                          setSearchResults(store.appData.coupons)
-                        }
-                      }}
+                      onChange={(e) => handleSearch(e.target.value)}
                       type="text"
                       id="table-search"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search for items" />
+                      placeholder="select search filter from the table"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                   </div>
                   <button onClick={() => modalAdd()} type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white" data-modal-toggle="authentication-modal">
                     <MdAdd size={30}></MdAdd> Add
@@ -167,7 +179,19 @@ const CouponsTool = () => {
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                       <th scope="col" className="px-6 py-3">
-                        Coupon Name
+                        Coupon Name <button onClick={() => setFilter('name')}><MdArrowDropDown /></button>
+                      </th>
+                      <th scope="col" className="px-6 py-3 hidden sm:table-cell">
+                        Discount value <button onClick={() => setFilter('value')}><MdArrowDropDown /></button>
+                      </th>
+                      <th scope="col" className="px-6 py-3 hidden md:table-cell">
+                        Discount Type
+                      </th>
+                      <th scope="col" className="px-6 py-3 hidden lg:table-cell">
+                        Minimum value <button onClick={() => setFilter('minValue')}><MdArrowDropDown /></button>
+                      </th>
+                      <th scope="col" className="px-6 py-3 hidden xl:table-cell">
+                        Availability
                       </th>
                       <th scope="col" className="px-6 py-3">
                         Valid Till
@@ -182,6 +206,18 @@ const CouponsTool = () => {
                       <tr key={i} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
                         <th scope="row" className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
                           {coupon.name}
+                        </th>
+                        <th scope="row" className="px-6 py-4 hidden sm:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                          {coupon.value}{coupon.isPercentage ? "%" : "$"}
+                        </th>
+                        <th scope="row" className="px-6 py-4 hidden md:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                          {coupon.isPercentage ? "Percentage" : "Amount"}
+                        </th>
+                        <th scope="row" className="px-6 py-4 hidden lg:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                          {coupon.minValue}$
+                        </th>
+                        <th scope="row" className="px-6 py-4 hidden xl:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                          {coupon.isActive ? "Available" : "Unavailable"}
                         </th>
                         <td className={`px-6 py-4 ${coupon && coupon.validTill < Date.now() ? 'text-red-500' : ''}`}>
                           {new Date(coupon.validTill).toISOString().split('T')[0]}
