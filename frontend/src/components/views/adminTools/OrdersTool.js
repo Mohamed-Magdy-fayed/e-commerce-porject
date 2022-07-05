@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { MdCancel, MdEdit } from "react-icons/md"
 import { editOrderAction, getOrdersAction } from "../../../context/store/StoreActions"
 import StoreContext from "../../../context/store/StoreContext"
+import useConfirm from "../../../hooks/useConfirm"
 import OrdersForm from "../../shared/forms/OrdersForm"
 import Spinner from "../../shared/Spinner"
 
@@ -12,26 +13,26 @@ const OrdersTool = () => {
   const [loading, setLoading] = useState([])
   const [reload, setReload] = useState(false)
 
+  const { confirmAction } = useConfirm()
+
   useEffect(() => {
     setLoading(true)
     getOrdersAction(store.auth.token).then((data) => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
+      if (data.error) {
+        showToast(data.error, false)
         setData('orders', [])
         setSearchResults([])
         setLoading(false)
-      } else {
-        setData('orders', data)
-        setSearchResults(data)
-        console.log(data);
-        setLoading(false)
+        return
       }
+      setData('orders', data)
+      setSearchResults(data)
+      setLoading(false)
     })
   }, [reload])
 
   // submit the edit form
   const handleEditSubmit = async (formStates) => {
-    setLoading(true)
     const orderData = {
       id: formStates.id,
       paymentMethod: formStates.paymentMethod,
@@ -40,31 +41,28 @@ const OrdersTool = () => {
       products: formStates.products,
       totalValue: formStates.totalValue,
     }
-    console.log(orderData);
 
-    /* Send data to API to register a new user */
-    const newOrder = await editOrderAction(store.auth.token, orderData)
-    hideModal()
-    getOrdersAction(store.auth.token).then(() => {
+    /* Send data to API to edit the order */
+    await editOrderAction(store.auth.token, orderData).then(data => {
+      if (data.error) return showToast(data.error, false)
+
+      hideModal()
       setReload(!reload)
-      setLoading(false)
     })
-
-    return newOrder
   }
 
-  // // opens edit modal
+  // opens edit modal
   const modalEdit = (index) => {
+    const order = store.appData.orders[index]
     const initStates = {
-      id: store.appData.orders[index]._id,
-      userID: store.appData.orders[index].userID,
-      paymentMethod: store.appData.orders[index].paymentMethod,
-      coupon: store.appData.orders[index].coupon,
-      status: store.appData.orders[index].status,
-      products: store.appData.orders[index].products,
-      totalValue: store.appData.orders[index].totalValue,
+      id: order._id,
+      userID: order.userID,
+      paymentMethod: order.paymentMethod,
+      coupon: order.coupon,
+      status: order.status,
+      products: order.products,
+      totalValue: order.totalValue,
     }
-    console.log(initStates);
 
     // fills the content for the edit modal
     const Content = () => {
@@ -75,27 +73,25 @@ const OrdersTool = () => {
         </div>
       )
     }
-
     showModal(Content)
   }
 
-  const handleDelete = async (index) => {
-    setLoading(true)
-    const orderID = store.appData.orders[index]._id
+  const handleCancel = async (index) => {
+    if (store.appData.orders[index].status === 'canceled') return showToast('order status is already canceled', false)
+
     const data = {
-      id: orderID,
+      id: store.appData.orders[index]._id,
       status: 'canceled'
     }
-    /* Send data to API to register a new user */
-    editOrderAction(store.auth.token, data).then(res => {
-      if (!res) {
-        showToast('an error occurred, please try again', false)
-        setLoading(false)
-        return
-      } else {
-        setReload(!reload)
-        setLoading(false)
-      }
+
+    const isConfirmed = await confirmAction(`Please confirm to cancel order ${data.id}`)
+    if (!isConfirmed) return
+
+    /* Send data to API to cancel the order */
+    await editOrderAction(store.auth.token, data).then(data => {
+      if (data.error) return showToast(data.error, false)
+
+      setReload(!reload)
     })
   }
 
@@ -156,7 +152,7 @@ const OrdersTool = () => {
                           <button data-toggle='tooltip' title="edit" id={i} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
                             <MdEdit />
                           </button>
-                          <button data-toggle='tooltip' title="cancel" id={i} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
+                          <button data-toggle='tooltip' title="cancel" id={i} onClick={(e) => handleCancel(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
                             <MdCancel />
                           </button>
                         </td>

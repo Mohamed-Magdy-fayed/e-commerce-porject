@@ -15,6 +15,7 @@ const ImagesForm = ({ onSubmit, initStates }) => {
 
   // runs the onSubmit func provided as a prope giving it all the state so you can use it
   const handleSubmit = (e) => {
+    setLoading(true)
     e.preventDefault();
     const formStates = {
       id: initStates ? initStates.id : 0,

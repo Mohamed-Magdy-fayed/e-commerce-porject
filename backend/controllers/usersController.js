@@ -189,6 +189,10 @@ const editUser = asyncHandler(async (req, res) => {
   } = req.body
   const id = req.params.id
 
+  // Check for user
+  const user = await User.findById(id)
+  if (!user) return res.status(400).json({ error: 'invalid user ID' })
+
   const edits = req.user.type === 'Admin' ? {
     firstName,
     lastName,
@@ -205,15 +209,11 @@ const editUser = asyncHandler(async (req, res) => {
     phone,
   }
 
-  if (edits.email !== req.user.email) {
+  if (edits.email !== user.email) {
     // check email
     const isDublicate = await User.find({ email: edits.email })
     if (isDublicate.length > 0) return res.status(400).json({ error: `user email already exists` })
   }
-
-  // Check for user
-  const doc = await User.findById(id)
-  if (!doc) return res.status(400).json({ error: `invalid user id` })
 
   // update the user
   const data = await User.findOneAndUpdate({ _id: id }, edits, {

@@ -43,7 +43,7 @@ const validateOrder = async (products, coupon) => {
         productsArray.push(product.price * products[index].amount)
     }
     const orderTotal = parseFloat(productsArray.length > 0 ? productsArray.reduce((a, b) => a + b).toFixed(2) : 0)
-    
+
     if (!coupon) return { totalValue: orderTotal }
 
     const data = await Coupons.findById(coupon)
@@ -118,7 +118,7 @@ const editOrder = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
-    const { paymentMethod, transactionID, coupon, status, products, totalValue } = req.body
+    const { status } = req.body
     const id = req.params.id
 
     // Check for order
@@ -127,12 +127,7 @@ const editOrder = asyncHandler(async (req, res) => {
 
     // update order
     const data = await Orders.findOneAndUpdate({ _id: id }, {
-        paymentMethod,
-        transactionID,
-        coupon,
         status,
-        products,
-        totalValue,
     }, {
         new: true
     })

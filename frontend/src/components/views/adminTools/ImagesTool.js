@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import { MdAdd, MdDelete, MdEdit } from "react-icons/md";
 import { addImageAction, deleteImageAction, editImageAction, getImagesAction } from "../../../context/store/StoreActions";
 import StoreContext from "../../../context/store/StoreContext";
+import useConfirm from "../../../hooks/useConfirm";
 import ImagesForm from "../../shared/forms/imagesForm";
 import Spinner from "../../shared/Spinner";
 
@@ -11,6 +12,8 @@ const ImagesTool = () => {
   const [loading, setLoading] = useState([])
   const [reload, setReload] = useState(false)
 
+  const { confirmAction } = useConfirm()
+
   useEffect(() => {
     setLoading(true)
     getImagesAction().then((res) => {
@@ -18,34 +21,27 @@ const ImagesTool = () => {
         showToast(res.error, false)
         setData('carousel', [])
         setLoading(false)
-      } else {
-        setData('carousel', res)
-        setLoading(false)
+        return
       }
+      setData('carousel', res)
+      setLoading(false)
     })
   }, [reload])
 
   // submit the add form
   const handleAddSubmit = async (formStates) => {
-    setLoading(true)
     const imageData = {
       imageURL: formStates.imageURL,
       productURL: formStates.productURL,
       isActive: formStates.isActive,
     };
 
-    console.log(imageData);
-
     /* Send data to API to add new image to the product */
-    hideModal();
-    addImageAction(store.auth.token, imageData).then(data => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
-        setLoading(false)
-      } else {
-        setReload(!reload)
-        setLoading(false)
-      }
+    await addImageAction(store.auth.token, imageData).then(data => {
+      if (data.error) return showToast(data.error, false)
+
+      hideModal()
+      setReload(!reload)
     })
   };
 
@@ -66,7 +62,6 @@ const ImagesTool = () => {
   };
 
   const handleEditSubmit = async (formStates) => {
-    setLoading(true)
     const { imageURL, productURL, isActive, id } = formStates
     const imageData = {
       imageURL,
@@ -75,18 +70,12 @@ const ImagesTool = () => {
       id,
     }
 
-    console.log(imageData);
+    /* Send data to API to edit the image */
+    await editImageAction(store.auth.token, imageData).then(data => {
+      if (data.error) return showToast(data.error, false)
 
-    /* Send data to API to register a new user */
-    hideModal()
-    editImageAction(store.auth.token, imageData).then(data => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
-        setLoading(false)
-      } else {
-        setReload(!reload)
-        setLoading(false)
-      }
+      hideModal()
+      setReload(!reload)
     })
   }
 
@@ -112,17 +101,16 @@ const ImagesTool = () => {
   }
 
   const handleDelete = async (index) => {
-    setLoading(true)
     const imageID = store.appData.carousel[index]._id
-    /* Send data to API to register a new user */
-    deleteImageAction(store.auth.token, imageID).then(data => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
-        setLoading(false)
-      } else {
-        setReload(!reload)
-        setLoading(false)
-      }
+
+    const isConfirmed = await confirmAction(`Please confirm to delete image ${imageID}`)
+    if (!isConfirmed) return
+
+    /* Send data to API to delete the image */
+    await deleteImageAction(store.auth.token, imageID).then(data => {
+      if (data.error) return showToast(data.error, false)
+
+      setReload(!reload)
     })
   }
 

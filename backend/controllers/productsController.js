@@ -32,7 +32,7 @@ const getProduct = asyncHandler(async (req, res) => {
 // @access  Public
 const searchProducts = asyncHandler(async (req, res) => {
     const query = req.params.query
-    
+
     // search the products
     const data = query !== 'undefined' ? await Product.find({ name: { $regex: query, $options: 'i' } }) : await Product.find()
     if (!data) return res.status(500).json({ error: `server error please try again` })
@@ -44,7 +44,6 @@ const searchProducts = asyncHandler(async (req, res) => {
 // @route   POST /api/products
 // @access  private
 const addProduct = asyncHandler(async (req, res) => {
-    res.send(req.body)
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })

@@ -1,6 +1,6 @@
 import { useContext, useEffect, useState } from 'react'
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md'
-import { addUserAction, adminAddUserAction, deleteUserAction, editUserAction, getUsersAction } from '../../../context/store/StoreActions'
+import { adminAddUserAction, deleteUserAction, editUserAction, getUsersAction } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
 import useConfirm from '../../../hooks/useConfirm'
 import RegisterForm from '../../shared/forms/RegisterForm'
@@ -49,17 +49,14 @@ const UsersTool = () => {
             type: formStates.type,
             status: formStates.status,
         }
-        console.log(userData)
 
         /* Send data to API to register a new user */
         await adminAddUserAction(store.auth.token, userData)
             .then(data => {
-                console.log(data);
                 if (data.error) return showToast(data.error, false)
 
                 setReload(!reload)
                 hideModal()
-                setLoading(false)
             })
     }
 
@@ -79,7 +76,6 @@ const UsersTool = () => {
 
     // submit the edit form
     const handleEditSubmit = async (formStates) => {
-        setLoading(true)
         const userData = {
             id: formStates.id,
             firstName: formStates.firstName,
@@ -92,27 +88,14 @@ const UsersTool = () => {
             status: formStates.status,
         }
 
-        console.log(userData)
+        /* Send data to API to edit the user */
+        await editUserAction(store.auth.token, userData)
+            .then(data => {
+                if (data.error) return showToast(data.error, false)
 
-        /* Send data to API to register a new user */
-        const newUser = await editUserAction(store.auth.token, userData)
-            .then(res => {
-                console.log(res)
-                if (res.error) {
-                    showToast(res.error, false)
-                    setLoading(false)
-                    return
-                }
-
+                setReload(!reload)
                 hideModal()
-                getUsersAction(store.auth.token).then(() => {
-                    setReload(!reload)
-                    setLoading(false)
-                })
             })
-
-        console.log(newUser);
-        return newUser
     }
 
     // opens edit modal
@@ -127,7 +110,6 @@ const UsersTool = () => {
             type: store.appData.users[id].type,
             status: store.appData.users[id].status,
         }
-        console.log(initStates)
 
         const Content = () => {
             return (
@@ -141,23 +123,17 @@ const UsersTool = () => {
     }
 
     const handleDelete = async (index) => {
-        setLoading(true)
         const userName = store.appData.users[index].firstName
 
         const isConfirmed = await confirmAction(`Please confirm to delete user ${userName}`)
         if (!isConfirmed) return setLoading(false)
 
         const userID = store.appData.users[index]._id
-        /* Send data to API to register a new user */
-        deleteUserAction(store.auth.token, userID).then(data => {
-            if (data.error) {
-                showToast(data.error, false)
-                setLoading(false)
-                return
-            }
+        /* Send data to API to delete the user */
+        await deleteUserAction(store.auth.token, userID).then(data => {
+            if (data.error) return showToast(data.error, false)
 
             setReload(!reload)
-            setLoading(false)
         })
     }
 

@@ -68,7 +68,7 @@ export const addProductAction = async (token, productData) => {
             'Content-Type': 'application/json',
             'Authorization': `Bearer ${token}`
         },
-        body: productData
+        data: productData
     }
     const res = await axios(config)
         .then(res => res)

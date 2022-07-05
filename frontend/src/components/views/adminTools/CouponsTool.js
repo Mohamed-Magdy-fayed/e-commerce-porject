@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from "react"
 import { MdAdd, MdDelete, MdEdit } from "react-icons/md"
 import { addCouponsAction, deleteCouponsAction, editCouponsAction, getCouponsAction } from "../../../context/store/StoreActions"
 import StoreContext from "../../../context/store/StoreContext"
+import useConfirm from "../../../hooks/useConfirm"
 import CouponsForm from "../../shared/forms/CouponsForm"
 import Spinner from "../../shared/Spinner"
 
@@ -11,6 +12,8 @@ const CouponsTool = () => {
   const [loading, setLoading] = useState([])
   const [searchResults, setSearchResults] = useState([])
   const [reload, setReload] = useState(false)
+
+  const { confirmAction } = useConfirm()
 
   useEffect(() => {
     setLoading(true)
@@ -42,13 +45,12 @@ const CouponsTool = () => {
       validTill: formStates.validTill,
     }
 
-    /* Send data to API to register a new user */
+    /* Send data to API to add a new coupon */
     await addCouponsAction(store.auth.token, couponData).then(data => {
       if (data.error) return showToast(data.error, false)
 
       setReload(!reload)
       hideModal()
-      setLoading(false)
     })
   }
 
@@ -68,7 +70,6 @@ const CouponsTool = () => {
 
   // submit the edit form
   const handleEditSubmit = async (formStates) => {
-    setLoading(true)
     const couponData = {
       id: formStates.id,
       name: formStates.name,
@@ -79,13 +80,12 @@ const CouponsTool = () => {
       validTill: formStates.validTill
     }
 
-    /* Send data to API to register a new user */
+    /* Send data to API to edit the coupon */
     await editCouponsAction(store.auth.token, couponData).then(data => {
       if (data.error) return showToast(data.error, false)
 
       setReload(!reload)
       hideModal()
-      setLoading(false)
     })
   }
 
@@ -116,12 +116,16 @@ const CouponsTool = () => {
   }
 
   const handleDelete = async (index) => {
-    setLoading(true)
     const cid = store.appData.coupons[index]._id
-    /* Send data to API to register a new user */
+
+    const isConfirmed = await confirmAction(`Please confirm to delete coupon ${store.appData.coupons[index].name}`)
+    if (!isConfirmed) return
+
+    /* Send data to API to delete the coupon */
     await deleteCouponsAction(store.auth.token, cid)
       .then((data) => {
         if (data.error) return showToast(data.error, false)
+
         setReload(!reload)
       })
   }

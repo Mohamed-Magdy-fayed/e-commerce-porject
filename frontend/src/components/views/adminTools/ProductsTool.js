@@ -2,6 +2,7 @@ import { useContext, useEffect, useState } from 'react'
 import { MdAdd, MdDelete, MdEdit } from 'react-icons/md'
 import { addProductAction, deleteProductAction, editProductAction, getProductsAction } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
+import useConfirm from '../../../hooks/useConfirm'
 import ProductsForm from '../../shared/forms/ProductsForm'
 import Spinner from '../../shared/Spinner'
 
@@ -14,29 +15,27 @@ const ProductsTool = () => {
   const [addButtonLoading, setAddButtonLoading] = useState(false)
   const [reload, setReload] = useState(false)
 
-  useEffect(() => {
-    setReload(!reload)
-  } ,[store.productForm])
+  const { confirmAction } = useConfirm()
 
   useEffect(() => {
     setLoading(true)
     getProductsAction(store.auth.token).then((data) => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
+      if (data.error) {
+        showToast(data.error, false)
         setData('products', [])
         setSearchResults([])
         setLoading(false)
-      } else {
-        setData('products', data)
-        setSearchResults(data)
-        setLoading(false)
+        return
       }
+
+      setData('products', data)
+      setSearchResults(data)
+      setLoading(false)
     })
   }, [store.productForm, reload])
 
   // submit the add form
   const handleAddSubmit = async (formStates) => {
-    setLoading(true)
 
     const productData = {
       id: formStates.id,
@@ -53,11 +52,12 @@ const ProductsTool = () => {
     }
 
     /* Send data to API to add a new product */
-    const newProduct = await editProductAction(store.auth.token, productData)
-    hideModal()
-    setReload(!reload)
+    await editProductAction(store.auth.token, productData).then(data => {
+      if (data.error) return showToast(data.error, false)
 
-    return newProduct
+      hideModal()
+      setReload(!reload)
+    })
   }
 
   // open the modal and fill it's content 
@@ -77,31 +77,32 @@ const ProductsTool = () => {
       highlights: [],
       tags: [],
     }
-    addProductAction(store.auth.token, initStates).then(data => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
+
+    await addProductAction(store.auth.token, initStates).then(data => {
+      if (data.error) {
+        showToast(data.error, false)
         setAddButtonLoading(false)
         return
-      } else {
-        setAddButtonLoading(false)
-        setProductForm(data._id, false)
-        const Content = () => {
-          return (
-            <div className="px-6 pb-4 space-y-6 lg:px-8 sm:pb-6 xl:pb-8">
-              <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add Product</h3>
-              <ProductsForm onSubmit={handleAddSubmit} id={data._id} />
-            </div>
-          )
-        }
-        showModal(Content)
       }
+      setAddButtonLoading(false)
+      setProductForm(data._id, false)
+
+      const Content = () => {
+        return (
+          <div className="px-6 pb-4 space-y-6 lg:px-8 sm:pb-6 xl:pb-8">
+            <h3 className="text-xl font-medium text-gray-900 dark:text-white">Add Product</h3>
+            <ProductsForm onSubmit={handleAddSubmit} id={data._id} />
+          </div>
+        )
+      }
+
+      showModal(Content)
     })
 
   }
 
   // submit the edit form
   const handleEditSubmit = async (formStates) => {
-    setLoading(true)
     const productData = {
       id: formStates.id,
       name: formStates.name,
@@ -117,19 +118,13 @@ const ProductsTool = () => {
     }
     setProductForm(productData.id, true)
 
-    /* Send data to API to register a new user */
-    editProductAction(store.auth.token, productData).then(data => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
-        setLoading(false)
-        return
-      } else {
-        setReload(!reload)
-        setProductForm('', false)
-        console.log(data)
-        hideModal()
-        setLoading(false)
-      }
+    /* Send data to API to edit the product */
+    await editProductAction(store.auth.token, productData).then(data => {
+      if (data.error) return showToast(data.error, false)
+
+      setProductForm('', false)
+      hideModal()
+      setReload(!reload)
     })
   }
 
@@ -151,7 +146,6 @@ const ProductsTool = () => {
       tags: store.appData.products[index].tags,
     }
 
-    console.log(initStates)
     setProductForm(initStates.id, true)
 
     const Content = () => {
@@ -167,20 +161,17 @@ const ProductsTool = () => {
   }
 
   const handleDelete = async (id) => {
-    setLoading(true)
     const productID = store.appData.products[id]._id
-    /* Send data to API to register a new user */
-    deleteProductAction(store.auth.token, productID).then(data => {
-      if (!data) {
-        showToast('an error occurred, please try again', false)
-        setLoading(false)
-        return
-      } else {
-        setReload(!reload)
-        setProductForm('', false)
-        console.log(data)
-        setLoading(false)
-      }
+
+    const isConfirmed = await confirmAction(`Please confirm to cancel order ${store.appData.products[id].name}`)
+    if (!isConfirmed) return
+
+    /* Send data to API to delete the product */
+    await deleteProductAction(store.auth.token, productID).then(data => {
+      if (data.error) return showToast(data.error, false)
+
+      setReload(!reload)
+      setProductForm('', false)
     })
   }
 

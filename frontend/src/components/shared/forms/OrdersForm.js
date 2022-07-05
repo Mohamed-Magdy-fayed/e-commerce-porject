@@ -1,66 +1,31 @@
-import React, { useContext, useEffect, useState } from 'react'
-import { AiFillDelete } from 'react-icons/ai'
+import { useContext, useEffect, useState } from 'react'
 import { getCouponsAction, getProductAction } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
 import Spinner from '../Spinner'
 
 const OrdersForm = ({ initStates, onSubmit }) => {
-    const { store, showToast } = useContext(StoreContext)
-    console.log(initStates);
+    const { store } = useContext(StoreContext)
 
-    const [paymentMethod, setPaymentMethod] = useState(initStates ? initStates.paymentMethod : 'cash')
     const [coupons, setCoupons] = useState([])
-    const [coupon, setCoupon] = useState(initStates ? initStates.coupon : {})
     const [status, setStatus] = useState(initStates ? initStates.status : 'pending')
     const [products, setProducts] = useState([])
     const [loading, setLoading] = useState(true)
-    const [productsTotal, setProductsTotal] = useState(initStates ? initStates.products : [])
 
     // runs the onSubmit func provided as a prope giving it all the state so you can use it
     const handleSubmit = (e) => {
         e.preventDefault()
-        const amountsAreZero = productsTotal.filter(p => p.amount <= 0).length
-        if (productsTotal.length === 0 || amountsAreZero > 0) return showToast(`can't remove all products, set to canceled instead!`, false)
-
         setLoading(true)
-
-        const getTotal = () => {
-            let total = 0
-            products.forEach(p => {
-                for (let index = 0; index < productsTotal.length; index++) {
-                    if (p._id !== productsTotal[index].productID) continue
-                    const amount = productsTotal[index].amount
-                    total += amount * p.price
-                }
-            })
-            if (!coupon) return total.toFixed(2)
-
-            if (coupon[0].validTill < Date.now()) return showToast(`Coupon expired`)
-
-            if (parseFloat(coupon[0].minValue) > parseFloat(total)) return showToast(`Order value is low`)
-
-            const value = parseFloat(coupon[0].value)
-            const discountValue = coupon[0].isPercentage ? parseFloat(total) * value / 100 : value
-            total = parseFloat(total - discountValue)
-            
-            return total.toFixed(2)
-        }
 
         const formStates = {
             id: initStates ? initStates.id : 0,
-            paymentMethod,
-            coupon: coupon ? coupon[0]._id : null,
             status, //{ pending, proccessing, shipped, delvired, canceled }
-            products: productsTotal,
-            totalValue: getTotal(),
         }
         onSubmit(formStates)
-        setLoading(false)
     }
 
     const getData = async () => {
-        const coupon = await getCouponsAction(store.auth.token)
-        setCoupons(coupon)
+        const res = await getCouponsAction(store.auth.token)
+        setCoupons(res)
 
         let products = []
 
@@ -71,21 +36,9 @@ const OrdersForm = ({ initStates, onSubmit }) => {
         }
 
         const data = {
-            coupon,
             products
         }
         return data
-    }
-
-    const handleRemoveItem = (id) => {
-        setProducts(prev => {
-            console.log(prev.filter(p => p._id !== id))
-            return prev.filter(p => p._id !== id)
-        })
-        setProductsTotal(prev => {
-            console.log(prev.filter(p => p.productID !== id))
-            return prev.filter(p => p.productID !== id)
-        })
     }
 
     useEffect(() => {
@@ -123,38 +76,20 @@ const OrdersForm = ({ initStates, onSubmit }) => {
                 </div>
                 <div className='flex justify-between items-end gap-6'>
                     <div className='w-full'>
-                        <label htmlFor="coupon" className="">
+                        <label>
                             Coupon
                         </label>
-                        <select
-                            id="coupon"
-                            name="coupon"
-                            className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            value={coupon ? coupon.name : 'none'}
-                            onChange={(e) => setCoupon(coupons.filter(c => c.name === e.target.value))}
-                        >
-                            <option>none</option>
-                            {coupons.map(c => (
-                                <option key={c._id}>{c.name}</option>
-                            ))}
-                        </select>
+                        <div className="select-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
+                            {initStates.coupon ? coupons.filter(c => c._id === initStates.coupon)[0].name : "none"}
+                        </div>
                     </div>
                     <div className='w-full'>
-                        <label htmlFor="paymentMethod" className="sr-only">
+                        <label>
                             Payment Method
                         </label>
-                        <select
-                            id="paymentMethod"
-                            name="paymentMethod"
-                            required
-                            className="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                            placeholder="Payment Method"
-                            value={paymentMethod}
-                            onChange={(e) => setPaymentMethod(e.target.value)}
-                        >
-                            <option>cash</option>
-                            <option>credit</option>
-                        </select>
+                        <div className="select-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm">
+                            {initStates.paymentMethod}
+                        </div>
                     </div>
                 </div>
                 <div>
@@ -162,32 +97,18 @@ const OrdersForm = ({ initStates, onSubmit }) => {
                     {products.map((product, i) => (
                         <div key={product._id} className='flex items-center justify-between py-4'>
                             <div className='relative'>
-                                <button onClick={() => handleRemoveItem(product._id)} className="absolute text-gray-700 md:ml-4">
-                                    <AiFillDelete color='red' />
-                                </button>
                                 <img src={product.images[0]} alt='product' className='w-20 rounded m-4' />
                             </div>
                             <div className='w-1/2'>
                                 <p className='font-bold'>{product.name}</p>
                                 <p>{product.price}</p>
-                                <input
-                                    type="number"
-                                    className="w-1/2 p-2 font-semibold text-center text-gray-700 bg-indigo-200 outline-none rounded-lg focus:outline-none hover:text-black focus:text-black"
-                                    onChange={(e) => {
-                                        setProductsTotal((prev) => {
-                                            const update = prev.map(p => {
-                                                if (p.productID === product._id) return { ...p, amount: parseInt(e.target.value) }
-                                                return p
-                                            })
-                                            return update
-                                        })
-                                    }}
-                                    value={productsTotal[i].amount}
-                                    required
-                                />
+                                <div className="select-none p-2 font-semibold text-center text-gray-700 bg-indigo-200 outline-none rounded-lg focus:outline-none hover:text-black focus:text-black">
+                                    Amount: {initStates.products[i].amount}
+                                </div>
                             </div>
                         </div>
                     ))}
+                    <p className='font-bold'>Order total value: ${parseFloat(initStates.totalValue).toFixed(2)}</p>
                 </div>
                 <div className='flex justify-center'>
                     {loading
