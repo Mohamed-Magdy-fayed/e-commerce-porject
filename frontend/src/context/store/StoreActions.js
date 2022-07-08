@@ -365,7 +365,7 @@ export const getUserAction = async (token, id) => {
     /* Send data to API to get the users */
     const config = {
         method: "get",
-        url: `/api/users/userid${id}`,
+        url: `/api/users/userid/${id}`,
         headers: {
             'Authorization': `Bearer ${token}`
         }

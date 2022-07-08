@@ -19,7 +19,7 @@ const getImages = asyncHandler(async (req, res) => {
 const addImage = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const {
         imageURL,
@@ -50,7 +50,7 @@ const addImage = asyncHandler(async (req, res) => {
 const deleteImage = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const id = req.params.id
 
@@ -71,7 +71,7 @@ const deleteImage = asyncHandler(async (req, res) => {
 const editImage = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const {
         imageURL,

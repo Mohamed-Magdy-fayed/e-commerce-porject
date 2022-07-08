@@ -9,7 +9,7 @@ const Coupons = require('../models/couponModel')
 const getCoupons = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     // get the data
     const data = await Coupons.find()
@@ -23,7 +23,7 @@ const getCoupons = asyncHandler(async (req, res) => {
 // @access  private
 const getCoupon = asyncHandler(async (req, res) => {
     // check user privilege
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `account is inactive, please contact support!` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `account is inactive, please contact support!` })
 
     const name = req.params.name
 
@@ -40,7 +40,7 @@ const getCoupon = asyncHandler(async (req, res) => {
 const addCoupon = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const { name, validTill, applyOnCash, isPercentage, value, isActive, minValue } = req.body
 
@@ -67,7 +67,7 @@ const addCoupon = asyncHandler(async (req, res) => {
 const deleteCoupon = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const id = req.params.id
 
@@ -88,7 +88,7 @@ const deleteCoupon = asyncHandler(async (req, res) => {
 const editCoupon = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const { name, validTill, applyOnCash, isPercentage, value, isActive, minValue } = req.body
     const id = req.params.id

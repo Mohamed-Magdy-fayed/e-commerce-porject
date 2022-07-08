@@ -9,7 +9,7 @@ const Product = require('../models/productsModel')
 const getProducts = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const data = await Product.find()
     if (!data) return res.status(500).json({ error: `server error please try again` })
@@ -46,7 +46,7 @@ const searchProducts = asyncHandler(async (req, res) => {
 const addProduct = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
     const newProduct = {
@@ -79,6 +79,7 @@ const addProduct = asyncHandler(async (req, res) => {
 // @access  private
 const deleteProduct = asyncHandler(async (req, res) => {
     // check user privilege
+    if (req.user.status === 'Suspended') return res.status(401).json({ error: `access denied, demo admin account` })
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
     if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 

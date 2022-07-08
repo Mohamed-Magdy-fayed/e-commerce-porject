@@ -10,7 +10,7 @@ const Coupons = require('../models/couponModel')
 // @access  private
 const getOrders = asyncHandler(async (req, res) => {
     // check user privilege
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
 
     // get the data
@@ -116,7 +116,7 @@ const deleteOrder = asyncHandler(async (req, res) => {
 // @access  private
 const editOrder = asyncHandler(async (req, res) => {
     // check user privilege
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const { status } = req.body
     const id = req.params.id

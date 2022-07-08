@@ -15,9 +15,11 @@ const protect = asyncHandler(async (req, res, next) => {
 
       // Verify token
       const decoded = jwt.verify(token, process.env.JWT_SECRET)
+      if (decoded.exp < new Date() / 1000) return res.status(401).json({ error: `Your session has expired, please login to continue.` })
 
       // Get user from the token
-      req.user = await User.findById(decoded.id).select('-password')
+      const user = await User.findById(decoded.id).select('-password')
+      req.user = user
 
       next()
     } catch (error) {

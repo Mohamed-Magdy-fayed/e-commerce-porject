@@ -14,7 +14,11 @@ export const useProtect = () => {
         if (checkToken) {
             const { id, token } = JSON.parse(checkToken)
             getUserAction(token, id).then(res => {
-                if (res.error) return showToast(res.error, false)
+                if (res.error) {
+                    navigate('/login')
+                    showToast(res.error, false)
+                    return
+                }
 
                 const userData = {
                     user: res,

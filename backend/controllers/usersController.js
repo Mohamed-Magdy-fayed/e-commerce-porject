@@ -15,7 +15,7 @@ const Orders = require('../models/ordersModel')
 const getAdminData = asyncHandler(async (req, res) => {
   // check user privilege
   if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+  // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
   const users = await User.find()
   const products = await Product.find()
@@ -39,7 +39,7 @@ const getAdminData = asyncHandler(async (req, res) => {
 const getUsers = asyncHandler(async (req, res) => {
   // check user privilege
   if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+  // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
   // get the data
   const data = await User.find()
@@ -49,12 +49,9 @@ const getUsers = asyncHandler(async (req, res) => {
 })
 
 // @desc    Get one user
-// @route   GET /api/users/userid:id
+// @route   GET /api/users/userid/:id
 // @access  Public
 const getUser = asyncHandler(async (req, res) => {
-  // check user privilege
-  if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
-
   const id = req.params.id
   // get the data
   const data = await User.findById(id).select('-password')
@@ -110,6 +107,7 @@ const registerUser = asyncHandler(async (req, res) => {
 // @access  Public
 const adminAddUser = asyncHandler(async (req, res) => {
   // check user privilege
+  if (req.user.status === 'Suspended') return res.status(401).json({ error: `access denied, demo admin account` })
   if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
   if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
@@ -176,6 +174,7 @@ const loginUser = asyncHandler(async (req, res) => {
 // @access  private
 const editUser = asyncHandler(async (req, res) => {
   // check user privilege
+  if (req.user.status === 'Suspended') return res.status(401).json({ error: `access denied, demo admin account` })
   if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, account is not active` })
 
   const {
@@ -229,6 +228,7 @@ const editUser = asyncHandler(async (req, res) => {
 // @access  private
 const deleteUser = asyncHandler(async (req, res) => {
   // check user privilege
+  if (req.user.status === 'Suspended') return res.status(401).json({ error: `access denied, demo admin account` })
   if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
   if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
@@ -327,7 +327,7 @@ const resetPassword = asyncHandler(async (req, res) => {
 // Generate JWT
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
-    expiresIn: '30d',
+    expiresIn: '1d',
   })
 }
 
