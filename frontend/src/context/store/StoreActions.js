@@ -219,7 +219,6 @@ export const addOrderAction = async (token, orderData) => {
         },
         data: orderData
     }
-    console.log(config);
     const res = await axios(config)
         .then(res => res)
         .catch(e => e.response)
@@ -518,7 +517,6 @@ export const resetPasswordAction = async (email, oldPassword, newPassword) => {
     const res = await axios(config)
         .then(res => res)
         .catch(e => e.response)
-    console.log(res)
     return res.data
 }
 
@@ -533,12 +531,10 @@ export const getPaymentLink = async (token, data) => {
         },
         data: { data: data }
     }
-    console.log(config)
     /* Send data to API to reset the password */
     const res = await axios(config)
         .then(res => res)
         .catch(e => e.response)
-    console.log(res.data)
     return res.data
 }
 
@@ -552,11 +548,9 @@ export const getPaymentSession = async (token, id) => {
             'Authorization': `Bearer ${token}`
         }
     }
-    console.log(config);
     /* Send data to API to reset the password */
     const res = await axios(config)
         .then(res => res)
         .catch(e => e.response)
-    console.log(res.data)
     return res.data
 }

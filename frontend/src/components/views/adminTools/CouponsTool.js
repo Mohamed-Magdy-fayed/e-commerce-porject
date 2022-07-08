@@ -9,7 +9,7 @@ import Spinner from "../../shared/Spinner"
 const CouponsTool = () => {
   const { store, showModal, hideModal, setData, showToast } = useContext(StoreContext)
 
-  const [filter, setFilter] = useState('')
+  const [filter, setFilter] = useState('name')
   const [loading, setLoading] = useState([])
   const [searchResults, setSearchResults] = useState([])
   const [reload, setReload] = useState(false)
@@ -44,10 +44,10 @@ const CouponsTool = () => {
       }
 
       setData('coupons', data)
-      setSearchResults(data)
+      setSearchResults(sorter(data))
       setLoading(false)
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload])
 
   // submit the add form
@@ -108,16 +108,17 @@ const CouponsTool = () => {
   }
 
   // opens edit modal
-  const modalEdit = (index) => {
+  const modalEdit = (id) => {
+    const coupon = store.appData.coupons.filter(coupon => coupon._id === id)[0]
     const initStates = {
-      id: store.appData.coupons[index]._id,
-      name: store.appData.coupons[index].name,
-      applyOnCash: store.appData.coupons[index].applyOnCash,
-      isPercentage: store.appData.coupons[index].isPercentage,
-      value: store.appData.coupons[index].value,
-      isActive: store.appData.coupons[index].isActive,
-      minValue: store.appData.coupons[index].minValue,
-      validTill: new Date(store.appData.coupons[index].validTill).toISOString().split('T')[0],
+      id: coupon._id,
+      name: coupon.name,
+      applyOnCash: coupon.applyOnCash,
+      isPercentage: coupon.isPercentage,
+      value: coupon.value,
+      isActive: coupon.isActive,
+      minValue: coupon.minValue,
+      validTill: new Date(coupon.validTill).toISOString().split('T')[0],
     }
 
     // fills the content for the edit modal
@@ -133,14 +134,13 @@ const CouponsTool = () => {
     showModal(Content)
   }
 
-  const handleDelete = async (index) => {
-    const cid = store.appData.coupons[index]._id
-
-    const isConfirmed = await confirmAction(`Please confirm to delete coupon ${store.appData.coupons[index].name}`)
+  const handleDelete = async (id) => {
+    const coupon = store.appData.coupons.filter(coupon => coupon._id === id)[0]
+    const isConfirmed = await confirmAction(`Please confirm to delete coupon ${coupon.name}`)
     if (!isConfirmed) return
 
     /* Send data to API to delete the coupon */
-    await deleteCouponsAction(store.auth.token, cid)
+    await deleteCouponsAction(store.auth.token, id)
       .then((data) => {
         if (data.error) return showToast(data.error, false)
 
@@ -224,10 +224,10 @@ const CouponsTool = () => {
                           {new Date(coupon.validTill).toISOString().split('T')[0]}
                         </td>
                         <td className="px-6 py-4 flex max-w-fit">
-                          <button id={i} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
+                          <button id={coupon._id} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
                             <MdEdit />
                           </button>
-                          <button id={i} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
+                          <button id={coupon._id} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
                             <MdDelete />
                           </button>
                         </td>

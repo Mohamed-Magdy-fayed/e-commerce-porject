@@ -13,7 +13,7 @@ const Profile = ({ paymentStatus }) => {
 
   const [loading, setLoading] = useState(false)
 
-  const { store, showModal, deleteFromLocation, showToast, setUserData, hideModal } = useContext(StoreContext)
+  const { store, showModal, deleteFromLocation, showToast, setUserData, hideModal, cartRemoveProduct } = useContext(StoreContext)
 
   const navigate = useNavigate()
 
@@ -35,6 +35,7 @@ const Profile = ({ paymentStatus }) => {
 
       order.products.forEach(product => {
         deleteFromLocation(product.productID, 'cartItems')
+        cartRemoveProduct(product.productID)
       })
       setLoading(false)
     })
@@ -71,7 +72,7 @@ const Profile = ({ paymentStatus }) => {
           }
         })
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paymentStatus, store.auth.token])
 
   if (loading) return <Spinner />

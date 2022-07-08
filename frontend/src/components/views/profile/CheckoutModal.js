@@ -10,7 +10,7 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
     const [orderID, setOrderID] = useState('')
     const [loading, setLoading] = useState(false)
 
-    const { store, deleteFromLocation, showToast, addToLocation, hideModal } = useContext(StoreContext)
+    const { store, deleteFromLocation, showToast, addToLocation, hideModal, cartRemoveProduct } = useContext(StoreContext)
 
     const products = productsTotal.map(item => {
         return {
@@ -47,7 +47,7 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
             })
     }
 
-    const sendData = () => {
+    const handleCashPayment = async () => {
         const data = {
             userID: store.auth.user._id,
             paymentMethod: 'cash',
@@ -58,15 +58,15 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
             totalValue: orderDetails.subTotal
         }
 
-        addOrderAction(store.auth.token, data).then((res) => {
-
+        await addOrderAction(store.auth.token, data).then(async res => {
             if (res.error) return showToast(res.error, false)
 
             setSuccess(true)
             setOrderID(res._id)
-            addItemToUser(store.auth.token, data.userID, 'orders', res._id)
+            await addItemToUser(store.auth.token, data.userID, 'orders', res._id)
             products.forEach(product => {
                 deleteFromLocation(product.productID, 'cartItems')
+                cartRemoveProduct(product.productID)
             })
             showToast(`thanks for your purchase your order status is currently ${res.status}`, true)
         })
@@ -145,7 +145,7 @@ const CheckoutModal = ({ productsTotal, coupon, orderDetails }) => {
                                     <span>Continue</span><BsArrowBarRight size={20}></BsArrowBarRight>
                                 </button>
                             ) : (
-                                <button disabled={success} onClick={() => sendData()} className='group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'>
+                                <button disabled={success} onClick={() => handleCashPayment()} className='group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'>
                                     Confirm Order
                                 </button>
                             )}

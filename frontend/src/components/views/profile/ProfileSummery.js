@@ -45,7 +45,11 @@ const ProfileSummery = () => {
         })
       }, [reload, store.auth])
 
-      if (loading) return <Spinner />
+      if (loading) return (
+        <div className="grid place-items-center w-full h-40">
+          <Spinner />
+        </div>
+      )
 
       return (
         <div className="relative grid place-items-center">

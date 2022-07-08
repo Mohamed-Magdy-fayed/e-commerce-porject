@@ -50,7 +50,7 @@ const validateOrder = async (products, coupon) => {
 
     if (!data) return { error: `not a valid coupon` }
     if (data.validTill < Date.now()) return { error: `coupon expired` }
-    if (!data.isActive) return { error: `invalid coupon` }
+    if (!data.isActive) return { error: `inactive coupon` }
     if (orderTotal < data.minValue) return { error: `order value is low` }
 
     const discountValue = parseInt(data.value)

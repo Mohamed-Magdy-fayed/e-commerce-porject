@@ -5,19 +5,19 @@ import { BsTrashFill } from "react-icons/bs";
 import { BsFillCreditCard2FrontFill } from "react-icons/bs";
 import StoreContext from "../../../context/store/StoreContext";
 import CartItemRow from "./CartItemRow";
-import { getCouponAction, getProductAction, getProductsAction, searchProductsAction } from "../../../context/store/StoreActions";
+import { getCouponAction, getProductAction } from "../../../context/store/StoreActions";
 import Spinner from "../../shared/Spinner";
 import CheckoutModal from "./CheckoutModal";
 
 const Cart = () => {
 
-  const { store, setData, showToast, showModal } = useContext(StoreContext)
+  const { store, showToast, showModal, cartAddProduct, cartRemoveProduct } = useContext(StoreContext)
 
+  const [loading, setLoading] = useState(true)
   const [total, setTotal] = useState(0)
   const [coupon, setCoupon] = useState(null)
   const [couponName, setCouponName] = useState('')
   const [couponLoading, setCouponLoading] = useState(false)
-  const [productsTotal, setProductsTotal] = useState([])
   const [orderDetails, setOrderDetails] = useState({})
 
   const applyCoupon = async () => {
@@ -31,6 +31,8 @@ const Cart = () => {
 
       if (parseFloat(coupon.minValue) > parseFloat(total)) return showToast(`Order value is low`)
 
+      if (!coupon.isActive) return showToast(`Inactive coupon`)
+
       setCoupon(data[0])
       setCouponLoading(false)
     })
@@ -40,7 +42,7 @@ const Cart = () => {
   const handleCheckout = () => {
     const Component = () => {
       return (
-        <CheckoutModal productsTotal={productsTotal} coupon={coupon} orderDetails={orderDetails} />
+        <CheckoutModal productsTotal={store.cartData} coupon={coupon} orderDetails={orderDetails} />
       )
     }
 
@@ -49,29 +51,33 @@ const Cart = () => {
 
   useEffect(() => {
     // calc total
-    const sum = productsTotal.map(item => item.product.price * item.amount)
-    setTotal(sum.length > 0 ? sum.reduce((a, b) => a + b).toFixed(2) : 0)
-    if (!coupon) return setOrderDetails({ subTotal: parseFloat(total) })
+    const sum = store.cartData.map(item => item.product.price * item.amount)
+    const totalAmount = sum.length > 0 ? sum.reduce((a, b) => a + b) : 0
+    setTotal(totalAmount)
+    if (!coupon) return setOrderDetails({ subTotal: totalAmount })
 
-    const discountValue = coupon.isPercentage ? parseInt(coupon.value) / 100 * total : parseInt(coupon.value)
-    const subTotal = total - discountValue
+    const discountValue = coupon.isPercentage ? parseInt(coupon.value) / 100 * totalAmount : parseInt(coupon.value)
+    const subTotal = totalAmount - discountValue
     setOrderDetails({ discountValue, subTotal: parseFloat(subTotal) })
-  }, [productsTotal, coupon])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [store.cartData, coupon])
 
   useEffect(() => {
+    setLoading(true)
     const getProducts = async () => {
-      let items = []
+      store.cartData.map(item => cartRemoveProduct(item.productID))
       for (let index = 0; index < store.auth.user.cartItems.length; index++) {
         const id = store.auth.user.cartItems[index]
         const product = await getProductAction(id)
-        items.push({ product, productID: product._id, amount: 1 })
+        cartAddProduct({ product, productID: product._id, amount: 1 })
       }
-      setProductsTotal(items)
+      setLoading(false)
     }
     getProducts()
-  }, [store.auth.user.cartItems])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
-  if (store.loading) {
+  if (loading) {
     return <Spinner />
   }
 
@@ -113,8 +119,8 @@ const Cart = () => {
                 </tr>
               </thead>
               <tbody>
-                {productsTotal.map(item => (
-                  <CartItemRow key={item.productID} product={item.product} setProductsTotal={setProductsTotal} />
+                {store.cartData.map(item => (
+                  <CartItemRow key={item.productID} product={item.product} />
                 ))}
               </tbody>
             </table>
@@ -175,7 +181,7 @@ const Cart = () => {
                       Total
                     </div>
                     <div className="lg:px-4 lg:py-2 m-2 lg:text-lg font-bold text-center text-gray-900">
-                      {total}€
+                      {total.toFixed(2)}$
                     </div>
                   </div>
                   <div className="flex justify-between pt-4 border-b">
@@ -189,7 +195,7 @@ const Cart = () => {
                       Coupon "{coupon && coupon.name}"
                     </div>
                     <div className="lg:px-4 lg:py-2 m-2 lg:text-lg font-bold text-center text-green-700">
-                      -{orderDetails.discountValue ? orderDetails.discountValue.toFixed(2) : (0).toFixed(2)}€
+                      -{orderDetails.discountValue ? orderDetails.discountValue.toFixed(2) : (0).toFixed(2)}$
                     </div>
                   </div>
                   <div className="flex justify-between pt-4 border-b">
@@ -197,13 +203,13 @@ const Cart = () => {
                       Sub total
                     </div>
                     <div className="lg:px-4 lg:py-2 m-2 lg:text-lg font-bold text-center text-gray-900">
-                      {orderDetails.subTotal ? orderDetails.subTotal.toFixed(2) : (0).toFixed(2)}€
+                      {orderDetails.subTotal ? orderDetails.subTotal.toFixed(2) : (0).toFixed(2)}$
                     </div>
                   </div>
                   <button
-                    disabled={productsTotal.filter(p => p.amount === 0).length > 0}
+                    disabled={store.cartData.filter(p => p.amount === 0 || isNaN(p.amount)).length > 0}
                     onClick={() => handleCheckout()}
-                    className={`flex justify-center items-center w-full px-10 py-3 font-medium ${productsTotal.filter(p => p.amount === 0).length > 0 ? 'text-white bg-slate-600 border-2 border-slate-600' : 'text-white bg-indigo-600 border-2 border-indigo-600 hover:bg-white hover:text-black focus:bg-white focus:text-black'} rounded-full outline-none transition-all duration-[350ms] ease-in-out uppercase shadow item-center focus:outline-none`}
+                    className={`flex justify-center items-center w-full px-10 py-3 mt-8 font-medium ${store.cartData.filter(p => p.amount === 0 || isNaN(p.amount)).length > 0 ? 'text-white bg-slate-600 border-2 border-slate-600' : 'text-white bg-indigo-600 border-2 border-indigo-600 hover:bg-white hover:text-black focus:bg-white focus:text-black'} rounded-full outline-none transition-all duration-[350ms] ease-in-out uppercase shadow item-center focus:outline-none`}
                   >
                     <BsFillCreditCard2FrontFill size={30} />
                     <span className="ml-2 mt-5px">Procceed to checkout</span>

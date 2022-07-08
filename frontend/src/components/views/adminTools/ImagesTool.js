@@ -81,8 +81,8 @@ const ImagesTool = () => {
   }
 
   // opens edit modal
-  const editModal = (index) => {
-    const { imageURL, productURL, isActive, _id } = store.appData.carousel[index]
+  const editModal = (id) => {
+    const { imageURL, productURL, isActive, _id } = store.appData.carousel.filter(image => image._id === id)[0]
     const initStates = {
       imageURL,
       productURL,
@@ -101,14 +101,12 @@ const ImagesTool = () => {
     showModal(Content)
   }
 
-  const handleDelete = async (index) => {
-    const imageID = store.appData.carousel[index]._id
-
-    const isConfirmed = await confirmAction(`Please confirm to delete image ${imageID}`)
+  const handleDelete = async (id) => {
+    const isConfirmed = await confirmAction(`Please confirm to delete image ${id}`)
     if (!isConfirmed) return
 
     /* Send data to API to delete the image */
-    await deleteImageAction(store.auth.token, imageID).then(data => {
+    await deleteImageAction(store.auth.token, id).then(data => {
       if (data.error) return showToast(data.error, false)
 
       setReload(!reload)
@@ -169,13 +167,13 @@ const ImagesTool = () => {
                       <td className="px-6 py-4">{image.isActive ? 'On Carousel' : 'Off Carousel'}</td>
                       <td className="px-6 py-4 flex max-w-fit">
                         <button
-                          id={i}
+                          id={image._id}
                           onClick={(e) => editModal(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700"
                         >
                           <MdEdit />
                         </button>
                         <button
-                          id={i}
+                          id={image._id}
                           onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700"
                         >
                           <MdDelete />

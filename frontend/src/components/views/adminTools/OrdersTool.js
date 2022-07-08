@@ -9,7 +9,7 @@ import Spinner from "../../shared/Spinner"
 const OrdersTool = () => {
   const { store, showModal, hideModal, showToast, setData } = useContext(StoreContext)
 
-  const [filter, setFilter] = useState('')
+  const [filter, setFilter] = useState('status')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState([])
   const [reload, setReload] = useState(false)
@@ -25,8 +25,9 @@ const OrdersTool = () => {
   }
 
   const handleSearch = (query) => {
+    const newArray = store.appData.orders.filter(order => order[filter].toLowerCase().includes(query.toLowerCase()))
     if (query.length > 0) {
-      setSearchResults(sorter(store.appData.orders.filter(order => order[filter].toLowerCase().includes(query.toLowerCase()))))
+      setSearchResults(sorter(newArray))
     } else {
       setSearchResults(sorter(store.appData.orders))
     }
@@ -43,10 +44,10 @@ const OrdersTool = () => {
         return
       }
       setData('orders', data)
-      setSearchResults(data)
+      setSearchResults(sorter(data))
       setLoading(false)
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reload])
 
   // submit the edit form
@@ -70,8 +71,8 @@ const OrdersTool = () => {
   }
 
   // opens edit modal
-  const modalEdit = (index) => {
-    const order = store.appData.orders[index]
+  const modalEdit = (id) => {
+    const order = store.appData.orders.filter(order => order._id === id)[0]
     const initStates = {
       id: order._id,
       userID: order.userID,
@@ -94,11 +95,12 @@ const OrdersTool = () => {
     showModal(Content)
   }
 
-  const handleCancel = async (index) => {
-    if (store.appData.orders[index].status === 'canceled') return showToast('order status is already canceled', false)
+  const handleCancel = async (id) => {
+    const order = store.appData.orders.filter(order => order._id === id)[0]
+    if (order.status === 'canceled') return showToast('order status is already canceled', false)
 
     const data = {
-      id: store.appData.orders[index]._id,
+      id: order._id,
       status: 'canceled'
     }
 
@@ -180,10 +182,10 @@ const OrdersTool = () => {
                           <p className="truncate">{parseFloat(order.totalValue).toFixed(2)}</p>
                         </th>
                         <td className="px-6 py-4 flex max-w-fit">
-                          <button data-toggle='tooltip' title="edit" id={i} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
+                          <button data-toggle='tooltip' title="edit" id={order._id} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
                             <MdEdit />
                           </button>
-                          <button data-toggle='tooltip' title="cancel" id={i} onClick={(e) => handleCancel(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
+                          <button data-toggle='tooltip' title="cancel" id={order._id} onClick={(e) => handleCancel(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
                             <MdCancel />
                           </button>
                         </td>

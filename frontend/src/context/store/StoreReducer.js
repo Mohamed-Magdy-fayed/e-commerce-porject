@@ -1,3 +1,5 @@
+import { logger } from '../middleware/logger'
+
 const storeReducer = (state, action) => {
     switch (action.type) {
         case 'LOGIN_USER':
@@ -80,6 +82,25 @@ const storeReducer = (state, action) => {
                         [action.location]: state.auth.user[action.location].filter(i => i !== action.payload)
                     }
                 },
+            }
+        case 'CART_ADD_PRODUCT':
+            return {
+                ...state,
+                cartData: [...state.cartData, action.payload],
+            }
+        case 'CART_REMOVE_PRODUCT':
+            return {
+                ...state,
+                cartData: state.cartData.filter(item => item.productID !== action.payload),
+            }
+        case 'CART_SET_AMOUNT':
+            return {
+                ...state,
+                cartData: state.cartData.map(item => {
+                    if (item.productID !== action.payload.productID) return item
+                    item.amount = action.payload.amount
+                    return item
+                }),
             }
         default:
             return state

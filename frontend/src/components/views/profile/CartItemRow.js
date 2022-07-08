@@ -1,27 +1,18 @@
-import React, { useContext, useEffect, useState } from 'react'
+import { useContext, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteItemFromUser } from '../../../context/store/StoreActions'
 import StoreContext from '../../../context/store/StoreContext'
 
-const CartItemRow = ({ product, setProductsTotal }) => {
-    const { store, deleteFromLocation } = useContext(StoreContext)
+const CartItemRow = ({ product }) => {
+    const { store, deleteFromLocation, cartRemoveProduct, cartSetAmount } = useContext(StoreContext)
 
     const [amount, setAmount] = useState(1)
 
     const handleRemoveItem = async (productID) => {
         deleteFromLocation(productID, 'cartItems')
         await deleteItemFromUser(store.auth.token, store.auth.user._id, 'cartItems', productID)
-        setProductsTotal((prev) => prev.filter(product => productID !== product.productID))
+        cartRemoveProduct(productID)
     }
-
-    useEffect(() => {
-        setProductsTotal((prev) => {
-            return prev.map(item => {
-                if (item.productID === product._id) return { ...item, amount: isNaN(amount) ? 0 : amount }
-                return item
-            })
-        })
-    }, [amount])
 
     return (
         <tr>
@@ -47,12 +38,18 @@ const CartItemRow = ({ product, setProductsTotal }) => {
                     <div className="relative flex flex-row w-full h-8">
                         <input
                             type="number"
-                            min={0}
+                            value={amount}
+                            min={1}
                             className="w-full p-2 font-semibold text-center text-gray-700 bg-indigo-200 outline-none rounded-lg focus:outline-none hover:text-black focus:text-black"
                             onChange={(e) => {
+                                if (e.target.value.length === 0) {
+                                    setAmount(1)
+                                    cartSetAmount(product._id, 1)
+                                    return
+                                }
+                                cartSetAmount(product._id, parseInt(e.target.value))
                                 setAmount(parseInt(e.target.value))
                             }}
-                            value={amount ? amount : 0}
                             required
                         />
                     </div>

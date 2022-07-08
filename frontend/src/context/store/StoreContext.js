@@ -50,6 +50,7 @@ export const StoreProvider = ({ children }) => {
       id: '',
       isEdit: false,
     },
+    cartData: [],
   };
 
   const [store, dispatch] = useReducer(storeReducer, initialState);
@@ -150,12 +151,36 @@ export const StoreProvider = ({ children }) => {
       location,
     })
   }
-  
+
   const deleteFromLocation = (productID, location) => {
     dispatch({
       type: 'DELETE_FROM_LOCATION',
       payload: productID,
       location,
+    })
+  }
+
+  const cartAddProduct = (item) => {
+    dispatch({
+      type: 'CART_ADD_PRODUCT',
+      payload: item,
+    })
+  }
+
+  const cartRemoveProduct = (productID) => {
+    dispatch({
+      type: 'CART_REMOVE_PRODUCT',
+      payload: productID,
+    })
+  }
+
+  const cartSetAmount = (productID, amount) => {
+    dispatch({
+      type: 'CART_SET_AMOUNT',
+      payload: {
+        productID,
+        amount,
+      }
     })
   }
 
@@ -175,6 +200,9 @@ export const StoreProvider = ({ children }) => {
         setUserData,
         setLoading,
         setProductForm,
+        cartAddProduct,
+        cartRemoveProduct,
+        cartSetAmount,
       }}
     >
       {children}

@@ -1,18 +1,17 @@
-import React, { useContext, useState } from "react";
+import React, { useContext } from "react";
 import { AiOutlineEdit, AiOutlineUser } from "react-icons/ai";
-import { editUserAction, getUserAction, resetPasswordAction } from "../../../context/store/StoreActions";
+import { editUserAction, getUserAction } from "../../../context/store/StoreActions";
 import StoreContext from "../../../context/store/StoreContext";
 import useResetPassword from "../../../hooks/useResetPassword";
 import RegisterForm from "../../shared/forms/RegisterForm";
 
 const AboutUser = () => {
 
-  const { store, showModal, setLoading, hideModal, loginUser, showToast } = useContext(StoreContext)
+  const { store, showModal, hideModal, loginUser, showToast } = useContext(StoreContext)
 
   const resetPassword = useResetPassword()
 
   const handleEditSubmit = async (formStates) => {
-    setLoading(true)
     const userData = {
       id: formStates.id,
       firstName: formStates.firstName,
@@ -22,15 +21,14 @@ const AboutUser = () => {
       phone: formStates.phone,
     }
 
-    /* Send data to API to register a new user */
+    /* Send data to API to edit the user */
     await editUserAction(store.auth.token, userData)
-      .then(res => {
-        if (res.error) return showToast(res.error, false)
+      .then(data => {
+        if (data.error) return showToast(data.error, false)
 
         getUserAction(store.auth.token, userData.id).then((res) => {
           loginUser({ user: res, token: store.auth.token })
           hideModal()
-          setLoading(false)
         })
       })
   }

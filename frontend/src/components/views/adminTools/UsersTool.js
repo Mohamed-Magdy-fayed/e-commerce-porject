@@ -46,7 +46,7 @@ const UsersTool = () => {
                 setLoading(false)
             }
         })
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [store.productForm, reload])
 
 
@@ -119,15 +119,16 @@ const UsersTool = () => {
 
     // opens edit modal
     const modalEdit = async (id) => {
+        const user = store.appData.users.filter(user => user._id === id)[0]
         const initStates = {
-            id: store.appData.users[id]._id,
-            firstName: store.appData.users[id].firstName,
-            lastName: store.appData.users[id].lastName,
-            email: store.appData.users[id].email,
-            phone: store.appData.users[id].phone,
-            address: store.appData.users[id].address,
-            type: store.appData.users[id].type,
-            status: store.appData.users[id].status,
+            id: user._id,
+            firstName: user.firstName,
+            lastName: user.lastName,
+            email: user.email,
+            phone: user.phone,
+            address: user.address,
+            type: user.type,
+            status: user.status,
         }
 
         const Content = () => {
@@ -141,15 +142,14 @@ const UsersTool = () => {
         showModal(Content)
     }
 
-    const handleDelete = async (index) => {
-        const userName = store.appData.users[index].firstName
+    const handleDelete = async (id) => {
+        const user = store.appData.users.filter(user => user._id === id)[0]
 
-        const isConfirmed = await confirmAction(`Please confirm to delete user ${userName}`)
+        const isConfirmed = await confirmAction(`Please confirm to delete user ${user.firstName}`)
         if (!isConfirmed) return setLoading(false)
 
-        const userID = store.appData.users[index]._id
         /* Send data to API to delete the user */
-        await deleteUserAction(store.auth.token, userID).then(data => {
+        await deleteUserAction(store.auth.token, id).then(data => {
             if (data.error) return showToast(data.error, false)
 
             setReload(!reload)
@@ -232,10 +232,10 @@ const UsersTool = () => {
                                                     {user.phone}
                                                 </td>
                                                 <td className="px-6 py-4 flex max-w-fit">
-                                                    <button id={i} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
+                                                    <button id={user._id} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
                                                         <MdEdit />
                                                     </button>
-                                                    <button id={i} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
+                                                    <button id={user._id} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
                                                         <MdDelete />
                                                     </button>
                                                 </td>

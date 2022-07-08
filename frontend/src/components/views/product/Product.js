@@ -15,7 +15,7 @@ import { addItemToUser, deleteItemFromUser, getProductAction } from "../../../co
 
 const Product = () => {
 
-  const { store, showToast, showModal, addToLocation, deleteFromLocation } = useContext(StoreContext)
+  const { store, showToast, showModal, addToLocation, deleteFromLocation, cartRemoveProduct, cartAddProduct } = useContext(StoreContext)
 
   const id = useLocation().pathname.split('product/')[1]
 
@@ -35,7 +35,7 @@ const Product = () => {
       setProduct(data)
       setPageLoading(false)
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   const handleAddToLocation = async (location) => {
@@ -51,6 +51,7 @@ const Product = () => {
     const isAdded = store.auth.user[location].filter(p => p === product._id).length > 0 ? true : false
     if (isAdded) {
       deleteFromLocation(product._id, location)
+      cartRemoveProduct(product._id)
       await deleteItemFromUser(store.auth.token, store.auth.user._id, location, product._id)
       setLoading(false)
       showToast(`${product.name} has been removed from your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)
@@ -58,6 +59,7 @@ const Product = () => {
     }
 
     addToLocation(product._id, location)
+    cartAddProduct({ product, productID: product._id, amount: 1 })
     await addItemToUser(store.auth.token, store.auth.user._id, location, product._id)
     setLoading(false)
     showToast(`${product.name} has been added to your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)

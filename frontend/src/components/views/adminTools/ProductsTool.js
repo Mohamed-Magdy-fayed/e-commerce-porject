@@ -10,7 +10,7 @@ const ProductsTool = () => {
 
   const { store, showModal, hideModal, setData, setProductForm, showToast } = useContext(StoreContext)
 
-  const [filter, setFilter] = useState('')
+  const [filter, setFilter] = useState('name')
   const [searchResults, setSearchResults] = useState([])
   const [loading, setLoading] = useState([])
   const [addButtonLoading, setAddButtonLoading] = useState(false)
@@ -46,10 +46,10 @@ const ProductsTool = () => {
       }
 
       setData('products', data)
-      setSearchResults(data)
+      setSearchResults(sorter(data))
       setLoading(false)
     })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [store.productForm, reload])
 
   // submit the add form
@@ -68,6 +68,7 @@ const ProductsTool = () => {
       pieces: formStates.pieces,
       features: formStates.features,
     }
+    if (productData.images[0].length <= 0) return showToast(`please add an image to the first field`, false)
 
     /* Send data to API to add a new product */
     await editProductAction(store.auth.token, productData).then(data => {
@@ -134,6 +135,7 @@ const ProductsTool = () => {
       pieces: formStates.pieces,
       features: formStates.features,
     }
+    if (productData.images[0].length <= 0) return showToast(`please add an image to the first field`, false)
     setProductForm(productData.id, true)
 
     /* Send data to API to edit the product */
@@ -147,21 +149,22 @@ const ProductsTool = () => {
   }
 
   // opens edit modal
-  const modalEdit = (index) => {
+  const modalEdit = (id) => {
+    const product = store.appData.products.filter(product => product._id === id)[0]
     const initStates = {
-      id: store.appData.products[index]._id,
-      name: store.appData.products[index].name,
-      details: store.appData.products[index].details,
-      images: store.appData.products[index].images,
-      price: store.appData.products[index].price,
-      brand: store.appData.products[index].brand,
-      category: store.appData.products[index].category,
-      isFeatured: store.appData.products[index].isFeatured,
-      age: store.appData.products[index].age,
-      pieces: store.appData.products[index].pieces,
-      features: store.appData.products[index].features,
-      highlights: store.appData.products[index].highlights,
-      tags: store.appData.products[index].tags,
+      id: product._id,
+      name: product.name,
+      details: product.details,
+      images: product.images,
+      price: product.price,
+      brand: product.brand,
+      category: product.category,
+      isFeatured: product.isFeatured,
+      age: product.age,
+      pieces: product.pieces,
+      features: product.features,
+      highlights: product.highlights,
+      tags: product.tags,
     }
 
     setProductForm(initStates.id, true)
@@ -179,13 +182,13 @@ const ProductsTool = () => {
   }
 
   const handleDelete = async (id) => {
-    const productID = store.appData.products[id]._id
+    const product = store.appData.products.filter(product => product._id === id)[0]
 
-    const isConfirmed = await confirmAction(`Please confirm to cancel order ${store.appData.products[id].name}`)
+    const isConfirmed = await confirmAction(`Please confirm to cancel order ${product.name}`)
     if (!isConfirmed) return
 
     /* Send data to API to delete the product */
-    await deleteProductAction(store.auth.token, productID).then(data => {
+    await deleteProductAction(store.auth.token, id).then(data => {
       if (data.error) return showToast(data.error, false)
 
       setReload(!reload)
@@ -263,10 +266,10 @@ const ProductsTool = () => {
                           {product.brand}
                         </th>
                         <td className="px-6 py-4 flex max-w-fit">
-                          <button id={i} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
+                          <button id={product._id} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
                             <MdEdit />
                           </button>
-                          <button id={i} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
+                          <button id={product._id} onClick={(e) => handleDelete(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:bg-rose-700">
                             <MdDelete />
                           </button>
                         </td>

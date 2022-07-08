@@ -103,12 +103,12 @@ const ImageInput = ({ id, setImages, init, setLoading }) => {
                     setImage('')
                     task.cancel && task.cancel()
                     id !== 'image' ? setImages({ string: '', isRunning: false }) : setImages('')
-                }} className="text-white absolute top-1 right-1">
+                }} className="text-white absolute top-1 right-1 z-10 border rounded-sm">
                     <MdOutlineClose />
                 </button>
                 <label
                     htmlFor={id}
-                    className={`text-white border w-[5rem] h-[5rem] grid place-items-center rounded-md bg-indigo-600 hover:bg-indigo-700`}
+                    className={`relative text-white border w-[5rem] h-[5rem] grid place-items-center rounded-md bg-indigo-600 hover:bg-indigo-700 overflow-hidden`}
                 >
                     <span>{isRunning ? progress + '%' : ''}</span>
                     {!isRunning ? (
@@ -120,7 +120,7 @@ const ImageInput = ({ id, setImages, init, setLoading }) => {
                         </svg>
                     )}
                     {image !== '' ? (
-                        <img className=" absolute w-[95%] bottom-[15%]" src={image} alt={id}></img>
+                        <img className=" absolute w-[95%] h-[70%] object-contain bottom-0" src={image} alt={id}></img>
                     ) : null}
                 </label>
                 <input

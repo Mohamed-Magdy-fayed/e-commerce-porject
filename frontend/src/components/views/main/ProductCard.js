@@ -7,7 +7,7 @@ import { addItemToUser, deleteItemFromUser } from "../../../context/store/StoreA
 
 const ProductCard = ({ productData }) => {
 
-  const { store, showToast, showModal, addToLocation, deleteFromLocation } = useContext(StoreContext)
+  const { store, showToast, showModal, addToLocation, deleteFromLocation, cartRemoveProduct, cartAddProduct } = useContext(StoreContext)
 
   const [loading, setLoading] = useState(false)
 
@@ -24,6 +24,7 @@ const ProductCard = ({ productData }) => {
     const isAdded = store.auth.user[location].filter(p => p === productData._id).length > 0 ? true : false
     if (isAdded) {
       deleteFromLocation(productData._id, location)
+      cartRemoveProduct(productData._id)
       await deleteItemFromUser(store.auth.token, store.auth.user._id, location, productData._id)
       setLoading(false)
       showToast(`${productData.name} has been removed from your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)
@@ -31,6 +32,7 @@ const ProductCard = ({ productData }) => {
     }
 
     addToLocation(productData._id, location)
+    cartAddProduct({ product: productData, productID: productData._id, amount: 1 })
     await addItemToUser(store.auth.token, store.auth.user._id, location, productData._id)
     setLoading(false)
     showToast(`${productData.name} has been added to your ${location === 'wishlistItems' ? 'wishlist' : 'cart'}`, true)
