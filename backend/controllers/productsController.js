@@ -100,7 +100,7 @@ const deleteProduct = asyncHandler(async (req, res) => {
 const editProduct = asyncHandler(async (req, res) => {
     // check user privilege
     if (req.user.type !== 'Admin') return res.status(401).json({ error: `access denied, not an admin` })
-    if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
+    // if (req.user.status !== 'Active') return res.status(401).json({ error: `access denied, admin account is not active` })
 
     const { category, images, age, pieces, isFeatured, features, details, name, price, brand } = req.body
     const id = req.params.id
