@@ -251,7 +251,7 @@ const ProductsTool = () => {
                     {searchResults.map((product, i) => (
                       <tr key={i} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
                         <td className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                          <p className='truncate outline w-40'>
+                          <p className='truncate w-40'>
                             {product.name}
                           </p>
                         </td>
