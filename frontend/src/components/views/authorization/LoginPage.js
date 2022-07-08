@@ -57,14 +57,50 @@ const LoginPage = () => {
         hideModal()
       }
     })
-
-
   };
 
   // Form on forgot password
   const forgetPassword = () => {
     resetPassword(true)
   };
+
+  // demo admin login
+  const handleDemoLogin = async () => {
+    setLoading(true);
+
+    const credentials = {
+      email: 'admin_test@email.com',
+      password: '1234',
+    };
+
+    await loginUserAction(credentials).then(res => {
+      if (res.error) {
+        setLoading(false)
+        return showToast(res.error, false)
+      }
+
+      // Dispatch the action to the state
+      const data = {
+        user: res.user,
+        token: res.token,
+      }
+      loginUser(data)
+
+      // Save token to local storage
+      const storage = {
+        id: res.user._id,
+        token: res.token,
+      };
+      localStorage.setItem("token", JSON.stringify(storage));
+      setLoading(false)
+
+      if (url.includes('login')) {
+        navigate("/")
+      } else {
+        hideModal()
+      }
+    })
+  }
 
   return (
     <>
@@ -147,6 +183,23 @@ const LoginPage = () => {
                   className="group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                 >
                   Log in
+                </button>
+              )}
+              {store.loading ? (
+                <button
+                  disabled
+                  type="button"
+                  className="group relative w-1/2 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                >
+                  Logging in...
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => handleDemoLogin()}
+                  className="group relative w-1/2 flex justify-center py-2 px-4 mt-4 border border-transparent text-sm font-medium rounded-md text-white bg-violet-600 hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500"
+                >
+                  Demo the app as an admin
                 </button>
               )}
               <div className="flex flex-row space-x-5 p-4">
