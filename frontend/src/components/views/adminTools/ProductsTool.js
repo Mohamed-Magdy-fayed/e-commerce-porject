@@ -217,14 +217,14 @@ const ProductsTool = () => {
                       onChange={(e) => handleSearch(e.target.value)}
                       type="text"
                       id="table-search"
-                      placeholder="select search filter from the table"
-                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-80 pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
+                      placeholder="select search filter"
+                      className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block pl-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" />
                   </div>
                   <button onClick={() => modalAdd()} type="button" disabled={addButtonLoading} className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white" data-modal-toggle="authentication-modal">
                     <MdAdd size={30}></MdAdd> Add
                   </button>
                 </div>
-                <table className="w-full text-sm text-left text-gray-500 dark:text-gray-400">
+                <table className="text-sm text-left text-gray-500 dark:text-gray-400">
                   <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                     <tr>
                       <th scope="col" className="px-6 py-3">
@@ -250,21 +250,23 @@ const ProductsTool = () => {
                   <tbody>
                     {searchResults.map((product, i) => (
                       <tr key={i} className="bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-600">
-                        <th scope="row" className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
-                          {product.name}
-                        </th>
-                        <th scope="row" className="px-6 py-4 hidden sm:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                        <td className="px-6 py-4 font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                          <p className='truncate outline w-40'>
+                            {product.name}
+                          </p>
+                        </td>
+                        <td className="px-6 py-4 hidden sm:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
                           {product.price}$
-                        </th>
-                        <th scope="row" className="px-6 py-4 hidden md:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                        </td>
+                        <td className="px-6 py-4 hidden md:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
                           {product.isFeatured ? "Yes" : "No"}
-                        </th>
-                        <th scope="row" className="px-6 py-4 hidden lg:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                        </td>
+                        <td className="px-6 py-4 hidden lg:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
                           {product.createdAt.split('T')[0]}
-                        </th>
-                        <th scope="row" className="px-6 py-4 hidden xl:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
+                        </td>
+                        <td className="px-6 py-4 hidden xl:table-cell font-medium text-gray-900 dark:text-white whitespace-nowrap">
                           {product.brand}
-                        </th>
+                        </td>
                         <td className="px-6 py-4 flex max-w-fit">
                           <button id={product._id} onClick={(e) => modalEdit(e.currentTarget.id)} className="group relative flex-grow flex justify-center py-2 px-4 border border-transparent text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:bg-indigo-700">
                             <MdEdit />
