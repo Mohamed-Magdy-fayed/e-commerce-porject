@@ -37,7 +37,7 @@ const Carousel = () => {
   }
 
   return (
-    <div>
+    <div className="select-none">
       <Swiper
         className="mySwiper 2xl:max-w-[1300px] w-full h-[350px] lg:h-[450px] overflow-hidden"
         spaceBetween={30}
